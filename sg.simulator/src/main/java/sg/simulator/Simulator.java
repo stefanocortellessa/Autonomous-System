@@ -17,7 +17,8 @@ public class Simulator extends Thread {
 
 	private ArrayList<Greenhouse> greenhouses;
 	private Calendar clock = new GregorianCalendar();
-
+	private PahoCommunicator paho = new PahoCommunicator();
+	
 	private volatile boolean active = true;
 	private double hour = 0;
 	private double extTemp = 15;
@@ -27,7 +28,7 @@ public class Simulator extends Thread {
 	private double grdHum = 45;
 	private int extLight;
 	private int extWind = 0;
-	private int rain = 0;
+	private int rain = 1;
 
 	public void run() {
 
@@ -77,7 +78,7 @@ public class Simulator extends Thread {
 		this.extWind = this.setWind();
 
 		/*
-		 * per OGNI sensore di OGNI Greenhouse, ogni mezz'ora aggiorno i dati dei valori
+		 * per ogni sensore di ogni Greenhouse, ogni mezz'ora aggiorno i dati dei valori
 		 * rilevati nel Database
 		 */
 		for (Greenhouse gh : greenhouses) {
@@ -85,12 +86,9 @@ public class Simulator extends Thread {
 			for (Sensor sns : sensors.get(gh.getId())) {
 				this.updateSensorValues(sns, dbm, gh, actuators.get(gh.getId()), 
 						this.extTemp, this.extHum, this.extLight, this.extWind);
-
 			}
-
+			
 		}
-
-		// active = false;
 	}
 
 	/*
@@ -114,7 +112,7 @@ public class Simulator extends Thread {
 			break;
 		case "grHum":
 			if (sns.getStatus()) {
-				dbm.updateSensor(sns.getId(), gh.getId(), this.setGroundlHumidity(), sns.getStatus(), sns.getName());
+				dbm.updateSensor(sns.getId(), gh.getId(), this.setGroundHumidity(actuators), sns.getStatus(), sns.getName());
 			}
 			break;
 		case "wind":
@@ -144,16 +142,39 @@ public class Simulator extends Thread {
 			}
 		}
 
-		new PahoCommunicator().publish("monitor/greenhouse/"+ sns.getIdGreenhouse() +"/sensor/" + sns.getType(),
+		paho.publish("monitor/greenhouse/"+ sns.getIdGreenhouse() +"/sensor/" + sns.getType(),
 				sns.getId() + "," + sns.getName() + "," + sns.getType() + "," + sns.getValue() + ","
 						+ sns.getIdGreenhouse(),
 				Constant.simulator_sender_id);
 		
-		new PahoCommunicator().publish("openHab/greenhouse/time",
-				this.hour + "",
+		System.out.println("ORARIO: " + this.hour);
+		String time = this.formatTime(clock.get(Calendar.HOUR_OF_DAY), clock.get(Calendar.MINUTE));
+		
+		paho.publish("openHab/greenhouse/time",
+				time,
 				Constant.simulator_sender_id);
 	}
 
+	public String formatTime(Integer hour, Integer minutes) {
+		
+		String h = null;
+		String m = null;
+		
+		if(hour < 10) {
+			
+			h = "0"+ hour;
+		} else {
+			h = hour + "";
+		}
+		
+		if (minutes < 1){
+			m = minutes + "0";
+		} else {
+			m = 30 + "";
+		}
+		
+		return h + ":" + m;
+	}
 	/*
 	 * Se piove, umidità aumenta del 10%
 	 */
@@ -243,7 +264,7 @@ public class Simulator extends Thread {
 	/*
 	 * Se attuatori 'water' attivi: (irrigatori) aumenta l'umidit� del 10%
 	 */
-	public double setGroundlHumidity() {
+	public double setGroundHumidity(HashMap<String, Actuator> actuators) {
 
 		Random rd = new Random();
 
@@ -272,6 +293,11 @@ public class Simulator extends Thread {
 				this.grdHum -= 0.25;
 			}
 		}
+		
+		this.grdHum += (((0 + (actuators.get("wat").getStatus() ? 1 : 0)) * (0.1 * this.grdHum)));
+
+		this.grdHum = this.roundingUp(this.grdHum, 2);
+		
 		return this.grdHum;
 	}
 
@@ -321,7 +347,7 @@ public class Simulator extends Thread {
 	/*
 	 * Temperatura interna � uguale a quella esterna ma varia
 	 * 
-	 * Se attuatori 'net' attivi: (reti ombreggianti) diminuisce di 0.5 grado ogni
+	 * Se attuatori 'light' attivi: (reti ombreggianti) diminuisce di 0.5 grado ogni
 	 * mezz'ora
 	 * 
 	 * A seconda dell'Intensit� Luminosa esterna: 0 -> aumenta 0 gradi ogni
@@ -372,21 +398,21 @@ public class Simulator extends Thread {
 
 		switch (this.extLight) {
 		case 3:
-			if (actuators.get("net").getStatus()) {
+			if (actuators.get("light").getStatus()) {
 				this.intTemp += 1;
 			} else {
 				this.intTemp += 2;
 			}
 			break;
 		case 2:
-			if (actuators.get("net").getStatus()) {
+			if (actuators.get("light").getStatus()) {
 				this.intTemp += 0.5;
 			} else {
 				this.intTemp += 1;
 			}
 			break;
 		case 1:
-			if (actuators.get("net").getStatus()) {
+			if (actuators.get("light").getStatus()) {
 				this.intTemp += 0;
 			} else {
 				this.intTemp += 0.5;
@@ -397,13 +423,13 @@ public class Simulator extends Thread {
 		}
 
 		this.intTemp =
-				precIntValue
-						+ (((0 + (actuators.get("temp").getStatus() ? 1 : 0)) * (actuators.get("temp").getPower()))
-								+ ((0 + (actuators.get("wind").getStatus() ? 1 : 0)) * (w * this.extTemp)));
-				//+this.extTemp) / 10;
+				(7*(precIntValue
+						+ (( (0 + (actuators.get("temp").getStatus() ? 1 : 0)) * (actuators.get("temp").getPower()) )
+						+ ((0 + (actuators.get("wind").getStatus() ? 1 : 0)) * (w * this.extTemp))))
+				+3*this.extTemp) / 10 + 0.8;
 
 		this.intTemp = this.roundingUp(this.intTemp, 2);
-
+		System.out.println("TEMPERATURA INTERNA: " + this.intTemp);
 		return this.intTemp;
 	}
 
@@ -466,10 +492,10 @@ public class Simulator extends Thread {
 
 		int r = new Random().nextInt(11);
 
-		if (r >= 0 && r < 9) {
+		if (r >= 0 && r < 7) {
 			// non piove
 			this.rain = 0;
-		} else if (r >= 9 && r < 11) {
+		} else if (r >= 8 && r < 11) {
 			// piove
 			this.rain = 1;
 		}

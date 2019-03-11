@@ -4,6 +4,7 @@ public class MonitorActivator{
 	public static void main(String[] args) throws InterruptedException {
 			
 		Monitor monitor = new Monitor();
-			monitor.start();			
+		
+		monitor.start();			
 		}
 	}

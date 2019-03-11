@@ -11,9 +11,9 @@ import sg.greenhouse.Greenhouse;
 import sg.mysqldb.DBManager;
 
 public class Analyzer{
-    private DBManager db = new DBManager();
-    //private Planner planner = new Planner();
     
+	private DBManager db = new DBManager();
+    //private Planner planner = new Planner();
     
     /*
      * 11 -> Temperatura bassa
@@ -33,7 +33,7 @@ public class Analyzer{
      * Il primo numero identifica il tipo di sensore (1 temperatura, 2 umidità, 3 luce, 4 umidità del terreno, 5 vento)
      * Il secondo numero identifica il tipo di pericolo (1 sotto il range, 2 sopra il range)
      * */
-    public void sensorValuesAnalysis(Map<Integer,ArrayList<Sensor>> sensors_per_greenhouse){
+    public Map<Integer, ArrayList<String>> sensorValuesAnalysis(Map<Integer,ArrayList<Sensor>> sensors_per_greenhouse){
     	
 		Map<Integer, ArrayList<String>> greenhouse_problems = new HashMap<Integer,ArrayList<String>>();
     	for (Map.Entry<Integer, ArrayList<Sensor>> entry : sensors_per_greenhouse.entrySet()){
@@ -121,14 +121,13 @@ public class Analyzer{
     			}
     		}
     		
+    		//Stampa problemi, divisi per greenhouse
     		if (greenhouse_problems.get(gh.getId()) != null && greenhouse_problems.get(gh.getId()).size() > 0){
     			System.out.println("Greenhouse " + gh.getId() + " Problems: " + greenhouse_problems.get(gh.getId()));
     			
-    		}	
-    	}    	
-    	
-    	//PASSARE QUI IL AL PLANNER greenhouse_problems CONTENENTE I CODICI DELLE SITUAZIONI ATTUALI
-    	
-    	System.out.println("");
+    		}
+    		
+    	}       	
+    	return greenhouse_problems;
     }    
 }

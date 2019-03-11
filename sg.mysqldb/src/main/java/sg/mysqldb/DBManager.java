@@ -22,7 +22,7 @@ public class DBManager {
 	DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
 
 	public Connection getConnection(Connection connection) {
-		
+
 		try {
 			try {
 				Class.forName("com.mysql.cj.jdbc.Driver");
@@ -34,7 +34,7 @@ public class DBManager {
 			connection = DriverManager.getConnection("jdbc:mysql://" + port + "?user=" + user + "&password=" + pwd
 					+ "&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone="
 					+ timeZone);
-			//System.out.println("Connection established");
+			// System.out.println("Connection established");
 
 		} catch (Exception e) {
 			System.out.println("SQLException: " + e.getMessage());
@@ -42,8 +42,7 @@ public class DBManager {
 		return connection;
 	}
 
-	
-	//eliminare users??
+	// eliminare users??
 	public void insertUser(String email, String pwd) {
 
 		String sql = "INSERT INTO users (email, password) VALUES (?,?)";
@@ -77,7 +76,7 @@ public class DBManager {
 			if (connection != null) {
 				try {
 					connection.close();
-					//System.out.println("Connection closed");
+					// System.out.println("Connection closed");
 				} catch (SQLException e) {
 				}
 			}
@@ -129,7 +128,7 @@ public class DBManager {
 			if (connection != null) {
 				try {
 					connection.close();
-					//System.out.println("Connection closed");
+					// System.out.println("Connection closed");
 				} catch (SQLException e) {
 				}
 			}
@@ -172,15 +171,15 @@ public class DBManager {
 			if (connection != null) {
 				try {
 					connection.close();
-					//System.out.println("Connection closed");
+					// System.out.println("Connection closed");
 				} catch (SQLException e) {
 				}
 			}
 		}
 	}
 
-	public void insertGreenhouse(String name, String plant, int optimal_temp, int optimal_hum, int optimal_light, int optimal_t_hum,
-			int range_temp, int range_hum,  int range_t_hum) {
+	public void insertGreenhouse(String name, String plant, int optimal_temp, int optimal_hum, int optimal_light,
+			int optimal_t_hum, int range_temp, int range_hum, int range_t_hum) {
 
 		String sqlInsert = "INSERT INTO greenhouse (name, plant, opt_temp, opt_hum, opt_light, opt_t_hum,"
 				+ "range_temp, range_hum, range_t_hum) VALUES (?,?,?,?,?,?,?,?,?)";
@@ -215,7 +214,7 @@ public class DBManager {
 			if (connection != null) {
 				try {
 					connection.close();
-					//System.out.println("Connection closed");
+					// System.out.println("Connection closed");
 				} catch (SQLException e) {
 				}
 			}
@@ -256,7 +255,7 @@ public class DBManager {
 			if (connection != null) {
 				try {
 					connection.close();
-					//System.out.println("Connection closed");
+					// System.out.println("Connection closed");
 				} catch (SQLException e) {
 				}
 			}
@@ -281,17 +280,9 @@ public class DBManager {
 
 			while (rs.next()) {
 
-				Greenhouse gh = new Greenhouse(
-						rs.getInt("id"),
-						rs.getString("name"),
-						rs.getString("plant"),
-						rs.getInt("opt_temp"),
-						rs.getInt("opt_hum"),
-						rs.getInt("opt_light"),	
-						rs.getInt("opt_t_hum"), 
-						rs.getInt("range_temp"), 
-						rs.getInt("range_hum"), 
-						rs.getInt("range_t_hum"));
+				Greenhouse gh = new Greenhouse(rs.getInt("id"), rs.getString("name"), rs.getString("plant"),
+						rs.getInt("opt_temp"), rs.getInt("opt_hum"), rs.getInt("opt_light"), rs.getInt("opt_t_hum"),
+						rs.getInt("range_temp"), rs.getInt("range_hum"), rs.getInt("range_t_hum"));
 
 				greenhouses.add(gh);
 			}
@@ -310,7 +301,7 @@ public class DBManager {
 			if (connection != null) {
 				try {
 					connection.close();
-					//System.out.println("Connection closed");
+					// System.out.println("Connection closed");
 				} catch (SQLException e) {
 				}
 			}
@@ -335,20 +326,13 @@ public class DBManager {
 
 			while (rs.next()) {
 
-				Greenhouse gh = new Greenhouse(rs.getInt("id"),
-						rs.getString("name"),
-						rs.getString("plant"),
-						rs.getInt("opt_temp"),
-						rs.getInt("opt_hum"),
-						rs.getInt("opt_light"),	
-						rs.getInt("opt_t_hum"), 
-						rs.getInt("range_temp"), 
-						rs.getInt("range_hum"),  
-						rs.getInt("range_t_hum"));
+				Greenhouse gh = new Greenhouse(rs.getInt("id"), rs.getString("name"), rs.getString("plant"),
+						rs.getInt("opt_temp"), rs.getInt("opt_hum"), rs.getInt("opt_light"), rs.getInt("opt_t_hum"),
+						rs.getInt("range_temp"), rs.getInt("range_hum"), rs.getInt("range_t_hum"));
 
 				greenhouse = gh;
 			}
-			//System.out.println("GREENHOUSE: " + greenhouse.getName());
+			// System.out.println("GREENHOUSE: " + greenhouse.getName());
 			return greenhouse;
 		} catch (SQLException e) {
 
@@ -363,7 +347,7 @@ public class DBManager {
 			if (connection != null) {
 				try {
 					connection.close();
-					//System.out.println("Connection closed");
+					// System.out.println("Connection closed");
 				} catch (SQLException e) {
 				}
 			}
@@ -415,20 +399,20 @@ public class DBManager {
 			if (connection != null) {
 				try {
 					connection.close();
-					//System.out.println("Connection closed");
+					// System.out.println("Connection closed");
 				} catch (SQLException e) {
 				}
 			}
 		}
 	}
-	
+
 	public HashMap<String, Actuator> selectGreenhouseActuatorsType(int id) {
 
 		String sql = "SELECT * FROM actuator WHERE id_greenhouse = ?";
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		Connection connection = null;
-		HashMap<String,Actuator> actuators = new HashMap<String,Actuator>();
+		HashMap<String, Actuator> actuators = new HashMap<String, Actuator>();
 
 		try {
 			connection = this.getConnection(connection);
@@ -437,22 +421,22 @@ public class DBManager {
 			ps.setInt(1, id);
 
 			rs = ps.executeQuery();
-			
+
 			while (rs.next()) {
 
 				Actuator act = new Actuator();
-				
+
 				act.setId(rs.getInt("id"));
 				act.setName(rs.getString("name"));
 				act.setIdGreenhouse(rs.getInt("id_greenhouse"));
 				act.setType(rs.getString("type"));
 				act.setStatus(rs.getBoolean("status"));
 				act.setPower(rs.getInt("power"));
-				
+
 				actuators.put(rs.getString("type"), act);
 			}
-			
-			//System.out.println("ACTUATORS: " + actuators);
+
+			// System.out.println("ACTUATORS: " + actuators);
 
 			return actuators;
 		} catch (SQLException e) {
@@ -468,7 +452,7 @@ public class DBManager {
 			if (connection != null) {
 				try {
 					connection.close();
-					//System.out.println("Connection closed");
+					// System.out.println("Connection closed");
 				} catch (SQLException e) {
 				}
 			}
@@ -508,7 +492,7 @@ public class DBManager {
 
 			for (int i = 0; i < sensors.size(); i++) {
 
-				//System.out.println("SENSORS: " + sensors.get(i).getName());
+				// System.out.println("SENSORS: " + sensors.get(i).getName());
 			}
 
 			return sensors;
@@ -525,7 +509,7 @@ public class DBManager {
 			if (connection != null) {
 				try {
 					connection.close();
-					//System.out.println("Connection closed");
+					// System.out.println("Connection closed");
 				} catch (SQLException e) {
 				}
 			}
@@ -559,9 +543,9 @@ public class DBManager {
 				sn.setValue(rs.getInt("value"));
 
 				sensors.add(sn);
-			
+
 			}
-			
+
 			return sensors;
 		} catch (SQLException e) {
 
@@ -576,7 +560,7 @@ public class DBManager {
 			if (connection != null) {
 				try {
 					connection.close();
-					//System.out.println("Connection closed");
+					// System.out.println("Connection closed");
 				} catch (SQLException e) {
 				}
 			}
@@ -631,7 +615,7 @@ public class DBManager {
 			if (connection != null) {
 				try {
 					connection.close();
-					//System.out.println("Connection closed");
+					// System.out.println("Connection closed");
 				} catch (SQLException e) {
 				}
 			}
@@ -644,23 +628,23 @@ public class DBManager {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		Connection connection = null;
-		
+
 		try {
 			connection = this.getConnection(connection);
 
 			ps = connection.prepareStatement(sql);
 			ps.setInt(1, id_greenhouse);
 			rs = ps.executeQuery();
-			
-			if (rs != null){
+
+			if (rs != null) {
 				return true;
 			} else {
 				return false;
 			}
-			
+
 		} catch (SQLException e) {
 			e.printStackTrace();
-			
+
 		} finally {
 			if (ps != null) {
 				try {
@@ -671,7 +655,7 @@ public class DBManager {
 			if (connection != null) {
 				try {
 					connection.close();
-					//System.out.println("Connection closed");
+					// System.out.println("Connection closed");
 				} catch (SQLException e) {
 				}
 			}
@@ -679,7 +663,6 @@ public class DBManager {
 		return false;
 	}
 
-	
 	public void insertSensor(int id_gh, String type, int value, boolean status, String name) {
 
 		String sql = "INSERT INTO sensor (id_greenhouse, type, value, status, name) VALUES (?,?,?,?,?)";
@@ -713,7 +696,7 @@ public class DBManager {
 			if (connection != null) {
 				try {
 					connection.close();
-					//System.out.println("Connection closed");
+					// System.out.println("Connection closed");
 				} catch (SQLException e) {
 				}
 			}
@@ -754,7 +737,7 @@ public class DBManager {
 			if (connection != null) {
 				try {
 					connection.close();
-					//System.out.println("Connection closed");
+					// System.out.println("Connection closed");
 				} catch (SQLException e) {
 				}
 			}
@@ -794,15 +777,15 @@ public class DBManager {
 			if (connection != null) {
 				try {
 					connection.close();
-					//System.out.println("Connection closed");
+					// System.out.println("Connection closed");
 				} catch (SQLException e) {
 				}
 			}
 		}
 	}
 
-	// Modifichiamo tutti i campi 'modificabili' es.il tipo non cambia mai così come
-	// l'id
+	// Modifichiamo tutti i campi 'modificabili' es.il tipo non cambia mai
+	// così come l'id
 	public void updateActuator(int id, int id_gh, int power, boolean status, String name) {
 
 		String sql = "UPDATE actuator SET id_greenhouse=?, power=?, status=?, name=? WHERE id=?";
@@ -835,7 +818,64 @@ public class DBManager {
 			if (connection != null) {
 				try {
 					connection.close();
-					//System.out.println("Connection closed");
+					// System.out.println("Connection closed");
+				} catch (SQLException e) {
+				}
+			}
+		}
+	}
+
+	// Modifichiamo tutti i campi 'modificabili' es.il tipo non cambia mai
+	// così come l'id
+	public void updateActuatorPower(int power, String type, int idGh) {
+
+		String sql = "UPDATE actuator SET power=?, status=? WHERE type=? AND id_greenhouse=?";
+		String sql2 = "UPDATE actuator SET status=? WHERE type=?  AND id_greenhouse=?";
+		
+		PreparedStatement ps = null;
+		Connection connection = null;
+
+		try {
+			if (type.equals("temp") || type.equals("hum")) {
+				
+				System.out.println("TIPO: " + type);
+				connection = this.getConnection(connection);
+				ps = connection.prepareStatement(sql);
+
+				ps.setInt(1, power);
+				ps.setInt(2, 1);
+				ps.setString(3, type);
+				ps.setInt(4, idGh);
+				
+				ps.executeUpdate();
+				System.out.println("Actuator Updated!");
+			} else {
+				
+				System.out.println("TIPO: " + type);
+				connection = this.getConnection(connection);
+				ps = connection.prepareStatement(sql2);
+
+				ps.setInt(1, power);
+				ps.setString(2, type);
+				ps.setInt(3, idGh);
+				
+				ps.executeUpdate();
+				System.out.println("Actuator Updated!");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Actuator NOT Updated!");
+		} finally {
+			if (ps != null) {
+				try {
+					ps.close();
+				} catch (SQLException e) {
+				}
+			}
+			if (connection != null) {
+				try {
+					connection.close();
+					// System.out.println("Connection closed");
 				} catch (SQLException e) {
 				}
 			}

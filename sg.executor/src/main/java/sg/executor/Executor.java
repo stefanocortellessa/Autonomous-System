@@ -11,15 +11,12 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 
 public class Executor extends Thread {
 
-	private Map<Integer, String> messages = new HashMap<Integer, String>();
+	private Map<Integer, String> values = new HashMap<Integer, String>();
 	private Map<Integer, String> topics = new HashMap<Integer, String>();
 	
-	private PahoCommunicator paho = new PahoCommunicator(messages, topics);
+	private PahoCommunicator paho = new PahoCommunicator(values, topics);
 	private DBManager dbm = new DBManager();
 	
-	private int idGh = 0;
-	private String actuatorType = "";
-
 	public void run() {
 
 		paho.subscribe("openHab/executor/greenhouse/+/actuator/#", Constant.executor_receiver_id);
@@ -44,7 +41,10 @@ public class Executor extends Thread {
 		System.out.println("RETRIEVE VALUES");
 		System.out.println("");
 		
-		if (!messages.isEmpty()) {
+		int idGh = 0;
+		String actuatorType = "";
+		
+		if (!values.isEmpty()) {
 			if(!topics.isEmpty()) {				
 				
 				//System.out.println("MESSAGES: " + messages + ", TOPICS: " + topics );
@@ -52,11 +52,11 @@ public class Executor extends Thread {
 					
 					idGh = Constant.get_id_greenhouse(tops.getValue());
 					actuatorType = Constant.get_actuator_type(tops.getValue());
-					dbm.updateActuatorPower(messages.get(tops.getKey()), actuatorType, idGh);
+					dbm.updateActuatorPower( Integer.parseInt(values.get(tops.getKey())), actuatorType, idGh);
 				}
-				messages.clear();
+				values.clear();
 				topics.clear();
-				paho = new PahoCommunicator(messages, topics);
+				paho = new PahoCommunicator(values, topics);
 			}
 		}
 	}

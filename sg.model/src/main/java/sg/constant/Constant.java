@@ -6,10 +6,12 @@ public final class Constant {
 	public static final String monitor_receiver_id = "monitor_receiver";
 	public static final String monitor_sender_id = "monitor_sender";
 	public static final String executor_sender_id = "executor_sender";
+	public static final String executor_receiver_id = "executor_receiver";
 	public static final String simulator_sender_id = "simulator_sender";
 	public static final String monitor_channel = "monitor/greenhouse/+/sensor/#";
 	public static final String actuator_channel = "monitor/greenhouse/+/actuator/";
 	public static final String simulator_channel = "monitor/simulator";
+	public static final String executor_channel = "openHab/executor/greenhouse/+/actuator/#";
 	public static final String int_temp_type = "intTemp";
 	public static final String ext_temp_type = "extTemp";
 	public static final String ext_hum_type = "extHum";
@@ -23,6 +25,10 @@ public final class Constant {
 	
 	public final static String[] parse_message(String s){
 		return s.split(",");
+	}
+	
+	public final static String[] parse_message2(String s){
+		return s.split("/");
 	}
 	
 	public final static int get_sensor_id_from_message(String s){
@@ -43,5 +49,13 @@ public final class Constant {
 	
 	public final static int get_gh_id_from_message(String s){
 		return new Integer(parse_message(s)[4]);
+	}
+	
+	public final static int get_id_greenhouse(String s){
+		return new Integer(parse_message2(s)[3]);
+	}
+	
+	public final static String get_actuator_type(String s){
+		return new String(parse_message2(s)[5]);
 	}
 }

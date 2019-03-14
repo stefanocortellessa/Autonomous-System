@@ -19,7 +19,7 @@ public class Executor extends Thread {
 	
 	public void run() {
 
-		paho.subscribe("openHab/executor/greenhouse/+/actuator/#", Constant.executor_receiver_id);
+		paho.subscribe("openHab/executor/greenhouse/+/actuator/#", Constant.executor_receiver);
 		
 		while (true) {
 			try {

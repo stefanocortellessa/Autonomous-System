@@ -145,14 +145,14 @@ public class Simulator extends Thread {
 		paho.publish("monitor/greenhouse/"+ sns.getIdGreenhouse() +"/sensor/" + sns.getType(),
 				sns.getId() + "," + sns.getName() + "," + sns.getType() + "," + sns.getValue() + ","
 						+ sns.getIdGreenhouse(),
-				Constant.simulator_sender_id);
+				Constant.simulator_sender);
 		
 		System.out.println("ORARIO: " + this.hour);
 		String time = this.formatTime(clock.get(Calendar.HOUR_OF_DAY), clock.get(Calendar.MINUTE));
 		
 		paho.publish("openHab/greenhouse/time",
 				time,
-				Constant.simulator_sender_id);
+				Constant.simulator_sender);
 	}
 
 	public String formatTime(Integer hour, Integer minutes) {
@@ -421,13 +421,18 @@ public class Simulator extends Thread {
 		default:
 			break;
 		}
-
+/*
 		this.intTemp =
 				(7*(precIntValue
 						+ (( (0 + (actuators.get("temp").getStatus() ? 1 : 0)) * (actuators.get("temp").getPower()) )
 						+ ((0 + (actuators.get("wind").getStatus() ? 1 : 0)) * (w * this.extTemp))))
 				+3*this.extTemp) / 10 + 0.8;
-
+*/
+		this.intTemp = ((9.5*(precIntValue + ((0 + (actuators.get("wind").getStatus() ? 1 : 0)) * (w * this.extTemp)))
+		        + (0.5*this.extTemp))/10);
+		
+		this.intTemp += ((0 + (actuators.get("temp").getStatus() ? 1 : 0)) * (1.5 * actuators.get("temp").getPower()));
+		  
 		this.intTemp = this.roundingUp(this.intTemp, 2);
 		System.out.println("TEMPERATURA INTERNA: " + this.intTemp);
 		return this.intTemp;
@@ -458,8 +463,10 @@ public class Simulator extends Thread {
 	/*
 	 * Intensit� luminosa identifacata come:
 	 * 
-	 * 0 -> molto nuvoloso o pioggia, 1 -> poco nuvoloso, 2 -> soleggiato, 3 ->
-	 * molto soleggiato, quindi molto caldo!
+	 * 0 -> molto nuvoloso o pioggia, 
+	 * 1 -> poco nuvoloso, 
+	 * 2 -> soleggiato, 
+	 * 3 -> molto soleggiato, quindi molto caldo!
 	 */
 	public int setLight() {
 

@@ -8,9 +8,11 @@ import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import sg.actuator.Actuator;
 import sg.greenhouse.Greenhouse;
+import sg.plan.Plan;
 import sg.sensor.Sensor;
 
 public class DBManager {
@@ -264,7 +266,7 @@ public class DBManager {
 
 	public ArrayList<Greenhouse> selectAllGreenhouses() {
 
-		System.out.println("DENTRO");
+		
 		String sql = "SELECT * FROM greenhouse";
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -309,7 +311,6 @@ public class DBManager {
 	}
 
 	public Greenhouse selectGreenhouseById(int id) {
-
 		String sql = "SELECT * FROM greenhouse WHERE id = ?";
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -321,15 +322,14 @@ public class DBManager {
 
 			ps = connection.prepareStatement(sql);
 			ps.setInt(1, id);
-
+			
 			rs = ps.executeQuery();
-
+			
 			while (rs.next()) {
-
 				Greenhouse gh = new Greenhouse(rs.getInt("id"), rs.getString("name"), rs.getString("plant"),
 						rs.getInt("opt_temp"), rs.getInt("opt_hum"), rs.getInt("opt_light"), rs.getInt("opt_t_hum"),
 						rs.getInt("range_temp"), rs.getInt("range_hum"), rs.getInt("range_t_hum"));
-
+				
 				greenhouse = gh;
 			}
 			// System.out.println("GREENHOUSE: " + greenhouse.getName());
@@ -622,46 +622,7 @@ public class DBManager {
 		}
 	}
 
-	public boolean checkActivePlan(int id_greenhouse) {
-
-		String sql = "SELECT * FROM actuator WHERE active = true AND id_greenhouse = ?";
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		Connection connection = null;
-
-		try {
-			connection = this.getConnection(connection);
-
-			ps = connection.prepareStatement(sql);
-			ps.setInt(1, id_greenhouse);
-			rs = ps.executeQuery();
-
-			if (rs != null) {
-				return true;
-			} else {
-				return false;
-			}
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-
-		} finally {
-			if (ps != null) {
-				try {
-					ps.close();
-				} catch (SQLException e) {
-				}
-			}
-			if (connection != null) {
-				try {
-					connection.close();
-					// System.out.println("Connection closed");
-				} catch (SQLException e) {
-				}
-			}
-		}
-		return false;
-	}
+	
 
 	public void insertSensor(int id_gh, String type, int value, boolean status, String name) {
 
@@ -865,6 +826,305 @@ public class DBManager {
 		} catch (SQLException e) {
 			e.printStackTrace();
 			System.out.println("Actuator NOT Updated!");
+		} finally {
+			if (ps != null) {
+				try {
+					ps.close();
+				} catch (SQLException e) {
+				}
+			}
+			if (connection != null) {
+				try {
+					connection.close();
+					// System.out.println("Connection closed");
+				} catch (SQLException e) {
+				}
+			}
+		}
+	}
+	
+	public ArrayList<Plan> selectActivePlans(int id_greenhouse) {
+
+		String sql = "SELECT * FROM plans WHERE active = 1 AND id_greenhouse = ?";
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		Connection connection = null;
+		ArrayList<Plan> plans = new ArrayList<Plan>();;
+
+		try {
+			connection = this.getConnection(connection);
+
+			ps = connection.prepareStatement(sql);
+			ps.setInt(1, id_greenhouse);
+			rs = ps.executeQuery();
+
+			while (rs.next()) {
+				Plan plan = new Plan(rs.getInt("id"), rs.getString("type"), rs.getBoolean("active"),rs.getDouble("current_value"),
+						rs.getInt("problem_code"), rs.getInt("score"),rs.getInt("id_greenhouse"));
+				plans.add(plan);
+			}
+			
+			return plans;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+
+		} finally {
+			if (ps != null) {
+				try {
+					ps.close();
+				} catch (SQLException e) {
+				}
+			}
+			if (connection != null) {
+				try {
+					connection.close();
+					// System.out.println("Connection closed");
+				} catch (SQLException e) {
+				}
+			}
+		}
+		return plans;
+	}
+	
+	public ArrayList<Plan> selectOldPlans(int id_greenhouse, String type) {
+
+		String sql = "SELECT * FROM plan WHERE active = 0 AND type=? AND id_greenhouse = ?";
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		Connection connection = null;
+		ArrayList<Plan> plans = new ArrayList<Plan>();;
+
+		try {
+			connection = this.getConnection(connection);
+
+			ps = connection.prepareStatement(sql);
+			ps.setString(1, type);
+			ps.setInt(2, id_greenhouse);
+			rs = ps.executeQuery();
+
+			while (rs.next()) {
+				Plan plan = new Plan(rs.getInt("id"), rs.getString("type"), rs.getBoolean("active"),rs.getDouble("current_value"),
+						rs.getInt("problem_code"), rs.getInt("score"),rs.getInt("id_greenhouse"));
+				plans.add(plan);
+			}
+			
+			return plans;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+
+		} finally {
+			if (ps != null) {
+				try {
+					ps.close();
+				} catch (SQLException e) {
+				}
+			}
+			if (connection != null) {
+				try {
+					connection.close();
+					// System.out.println("Connection closed");
+				} catch (SQLException e) {
+				}
+			}
+		}
+		return plans;
+	}
+	
+	
+	
+	
+	public Plan selectActiveTypePlan(int id_greenhouse, String type) {
+
+		String sql = "SELECT * FROM plan WHERE active = 1 AND type = ? AND id_greenhouse = ?";
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		Connection connection = null;
+		Plan plan = null;
+
+		try {
+			connection = this.getConnection(connection);
+
+			ps = connection.prepareStatement(sql);
+			ps.setInt(1, id_greenhouse);
+			ps.setString(2, type);
+			rs = ps.executeQuery();
+
+			while (rs.next()) {
+				plan = new Plan(rs.getInt("id"), rs.getString("type"), rs.getBoolean("active"), rs.getDouble("current_value"),
+						rs.getInt("problem_code"), rs.getInt("score"),rs.getInt("id_greenhouse"));
+			}
+			
+			return plan;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+
+		} finally {
+			if (ps != null) {
+				try {
+					ps.close();
+				} catch (SQLException e) {
+				}
+			}
+			if (connection != null) {
+				try {
+					connection.close();
+					// System.out.println("Connection closed");
+				} catch (SQLException e) {
+				}
+			}
+		}
+		return plan;
+	}
+	
+	public void insertPlan(int id_gh, String type, boolean active, double current_value, int problem_code) {
+
+		String sql = "INSERT INTO plan (active,id_greenhouse,type, current_value, problem_code) VALUES (?,?,?,?,?)";
+
+		PreparedStatement ps = null;
+		Connection connection = null;
+
+		try {
+			connection = this.getConnection(connection);
+
+			// Inserisco il piano
+			ps = connection.prepareStatement(sql);
+
+			ps.setBoolean(1, active);
+			ps.setInt(2, id_gh);
+			ps.setString(3, type);
+			ps.setDouble(4, current_value);
+			ps.setInt(5, problem_code);
+
+			ps.executeUpdate();
+			System.out.println("Plan Inserted!");
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (ps != null) {
+				try {
+					ps.close();
+				} catch (SQLException e) {
+				}
+			}
+			if (connection != null) {
+				try {
+					connection.close();
+					// System.out.println("Connection closed");
+				} catch (SQLException e) {
+				}
+			}
+		}
+	}
+
+	public Map<String,Actuator> selectPlanActuators(int id) {
+
+		String sql = "SELECT * FROM plans_history WHERE id_plan = ?";
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		Connection connection = null;
+		Map<String,Actuator> actuators = new HashMap<String,Actuator>();
+
+		try {
+			connection = this.getConnection(connection);
+
+			ps = connection.prepareStatement(sql);
+			ps.setInt(1, id);
+
+			rs = ps.executeQuery();
+
+			while (rs.next()) {
+
+				Actuator actuator = new Actuator(
+						rs.getInt("power"), 
+						rs.getString("type"));
+				actuators.put(actuator.getType(), actuator);
+				
+			}
+
+
+			return actuators;
+		} catch (SQLException e) {
+
+			return actuators;
+		} finally {
+			if (ps != null) {
+				try {
+					ps.close();
+				} catch (SQLException e) {
+				}
+			}
+			if (connection != null) {
+				try {
+					connection.close();
+					// System.out.println("Connection closed");
+				} catch (SQLException e) {
+				}
+			}
+		}
+	}
+	
+	
+	
+	public void deactivatePlan(int id) {
+
+		String sql = "UPDATE plan SET active = 0 WHERE id=?";
+		PreparedStatement ps = null;
+		Connection connection = null;
+
+		try {
+			connection = this.getConnection(connection);
+			ps = connection.prepareStatement(sql);
+
+			ps.setInt(1, id);
+
+			ps.executeUpdate();
+			System.out.println("Plan deactivated!");
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Plan NOT deactivated!");
+		} finally {
+			if (ps != null) {
+				try {
+					ps.close();
+				} catch (SQLException e) {
+				}
+			}
+			if (connection != null) {
+				try {
+					connection.close();
+					// System.out.println("Connection closed");
+				} catch (SQLException e) {
+				}
+			}
+		}
+	}
+	
+	public void updateCurrentVPlan(int id, double current_value) {
+
+		String sql = "UPDATE plan SET current_value = ? WHERE id=?";
+		PreparedStatement ps = null;
+		Connection connection = null;
+
+		try {
+			connection = this.getConnection(connection);
+			ps = connection.prepareStatement(sql);
+			
+			
+			ps.setDouble(1, current_value);
+			ps.setInt(2, id);
+			
+
+			ps.executeUpdate();
+			System.out.println("Plan deactivated!");
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Plan NOT deactivated!");
 		} finally {
 			if (ps != null) {
 				try {

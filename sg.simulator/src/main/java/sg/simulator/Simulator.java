@@ -112,7 +112,7 @@ public class Simulator extends Thread {
 			break;
 		case "grHum":
 			if (sns.getStatus()) {
-				dbm.updateSensor(sns.getId(), gh.getId(), this.setGroundHumidity(actuators), sns.getStatus(), sns.getName());
+				dbm.updateSensor(sns.getId(), gh.getId(), this.setGroundHumidity(actuators,sns.getValue()), sns.getStatus(), sns.getName());
 			}
 			break;
 		case "wind":
@@ -146,7 +146,15 @@ public class Simulator extends Thread {
 				sns.getId() + "," + sns.getName() + "," + sns.getType() + "," + sns.getValue() + ","
 						+ sns.getIdGreenhouse(),
 				Constant.simulator_sender);
+		if(sns.getType().equals("light"))
+		{
+			System.out.println("------------------------------------");
+			System.out.println("GREENHOUSE   "+sns.getIdGreenhouse() +"      TIPO : "+sns.getType()+"   VALOREEEE:   "+sns.getValue());
+			System.out.println("------------------------------------");
+			
+		}
 		
+
 		System.out.println("ORARIO: " + this.hour);
 		String time = this.formatTime(clock.get(Calendar.HOUR_OF_DAY), clock.get(Calendar.MINUTE));
 		
@@ -243,12 +251,11 @@ public class Simulator extends Thread {
 			}
 		}
 
-		this.intHum += (5
-				* (precIntValue
-						+ (((0 + (actuators.get("hum").getStatus() ? 1 : 0)) * (actuators.get("hum").getPower()))
-								+ ((0 + (actuators.get("wat").getStatus() ? 1 : 0)) * (0.1 * precIntValue))))
-				+ this.extHum) / 6;
-
+		this.intHum += ((9.5 * (precIntValue + ((0 + (actuators.get("wat").getStatus() ? 1 : 0)) * (0.05 * precIntValue)))
+						+ (0.5 * this.extHum)) / 10);
+		
+		this.intHum += (0 + (actuators.get("hum").getStatus() ? 1 : 0)) * (1.5 * actuators.get("hum").getPower());
+		
 		this.intHum = this.roundingUp(this.intHum, 2);
 
 		/*
@@ -264,38 +271,21 @@ public class Simulator extends Thread {
 	/*
 	 * Se attuatori 'water' attivi: (irrigatori) aumenta l'umidit� del 10%
 	 */
-	public double setGroundHumidity(HashMap<String, Actuator> actuators) {
+	public double setGroundHumidity(HashMap<String, Actuator> actuators, double precGrdValue) {
 
-		Random rd = new Random();
-
-		if (this.hour >= 22 || this.hour < 9) {
-			if (this.hour == 22) {
-				this.grdHum = rd.nextInt(4) + 40;
-			} else {
-				this.grdHum += 0.5;
-			}
-		} else if (this.hour >= 9 && this.hour < 14) {
-			if (this.hour == 9) {
-				this.grdHum = rd.nextInt(4) + 50;
-			} else {
-				this.grdHum -= 0.75;
-			}
-		} else if (this.hour >= 14 && this.hour < 19) {
-			if (this.hour == 14) {
-				this.grdHum = rd.nextInt(4) + 43;
-			} else {
-				this.grdHum -= 0.5;
-			}
-		} else if (this.hour >= 19 && this.hour < 22) {
-			if (this.hour == 19) {
-				this.grdHum = rd.nextInt(4) + 37;
-			} else {
-				this.grdHum -= 0.25;
-			}
+		if(actuators.get("wat").getStatus()) {
+			
+			this.grdHum += (((0 + (actuators.get("wat").getStatus() ? 1 : 0)) * (0.5 * this.grdHum)));
+			
+		}
+		else {
+			this.grdHum -= (0.02*this.grdHum);
 		}
 		
-		this.grdHum += (((0 + (actuators.get("wat").getStatus() ? 1 : 0)) * (0.1 * this.grdHum)));
-
+		if (this.grdHum >= 100) {
+			this.grdHum = 100;
+		}
+		
 		this.grdHum = this.roundingUp(this.grdHum, 2);
 		
 		return this.grdHum;
@@ -429,12 +419,13 @@ public class Simulator extends Thread {
 				+3*this.extTemp) / 10 + 0.8;
 */
 		this.intTemp = ((9.5*(precIntValue + ((0 + (actuators.get("wind").getStatus() ? 1 : 0)) * (w * this.extTemp)))
-		        + (0.5*this.extTemp))/10);
+		        + (0.5*this.extTemp))/10)+0.5;
 		
 		this.intTemp += ((0 + (actuators.get("temp").getStatus() ? 1 : 0)) * (1.5 * actuators.get("temp").getPower()));
 		  
 		this.intTemp = this.roundingUp(this.intTemp, 2);
 		System.out.println("TEMPERATURA INTERNA: " + this.intTemp);
+		
 		return this.intTemp;
 	}
 

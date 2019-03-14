@@ -20,14 +20,14 @@ public final class Constant {
 	public static final String int_hum_type = "intHum";
 	public static final String light_type = "light";
 	public static final String wind_type = "wind";
-	public static final String terrain_hum_type = "grdHum";
+	public static final String terrain_hum_type = "grHum";
 	public static final String rain_type = "rain";
 	// types of actuators
 	public static final String conditioner = "temp";
 	public static final String humidifier = "hum";
 	public static final String sprinkler = "wat";
 	public static final String air_vents = "wind";
-	public static final String net = "net";
+	public static final String net = "light";
 	// problems
 	/*
 	 * 11 -> Temperatura bassa 12 -> Temperatura alta 13 -> Buona Temperatura 21 ->

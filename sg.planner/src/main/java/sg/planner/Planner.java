@@ -23,57 +23,80 @@ public class Planner {
 												HashMap<String, Actuator> actuators) {
 		
 		ArrayList <String> reactions = new ArrayList<String>();
-		
+
+
 		if(problem == Constant.low_int_temp){	
-			
-			//se temperatura esterna < temperatura interna
-			if(sensors.get(Constant.ext_temp_type).getValue() <=
-					sensors.get(Constant.int_temp_type).getValue()) {
-				//se attuatori sportelli attivi
-				if(actuators.get(Constant.air_vents).getStatus()) {
-					//chiudo
-					reactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_off);	
-				}
-			} else {
-				//se attuatori sportelli chiusi
-				if(!actuators.get(Constant.air_vents).getStatus()) {
-					//apro
-					reactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_on);	
+			System.out.println("Temperatura Bassa");
+			if(!(states.get(Constant.wind_type) == Constant.wind_danger)) {
+				//se temperatura esterna < temperatura interna
+				if(sensors.get(Constant.ext_temp_type).getValue() <=
+						sensors.get(Constant.int_temp_type).getValue()) {
+					System.out.println("Esterna <= Interna ---- Temperatura");
+					//se attuatori sportelli attivi
+					if(actuators.get(Constant.air_vents).getStatus()) {
+						//chiudo
+						reactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_off);	
+					}
+				} else {
+					System.out.println("Esterna > Interna ---- Temperatura");
+					//se attuatori sportelli chiusi
+					if(!actuators.get(Constant.air_vents).getStatus()) {
+						//apro
+						reactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_on);	
+					}
 				}
 			}
+			
 			//se luce è buona
 			if(states.get(Constant.light_type) == Constant.good_light ) {
+				System.out.println("Luce Buona");
 				//se attuatori reti attive
 				if(actuators.get(Constant.net).getStatus()) {
 					//chiudo
+					System.out.println("Attuatori aperti, li apro");
 					reactions.add(Constant.net + Constant.positive_separator + Constant.planner_off);	
 				}
 			}
 		}else if(problem == Constant.high_int_temp){
-			//se temperatura esterna > temperatura interna
-			if(sensors.get(Constant.ext_temp_type).getValue() >
-					sensors.get(Constant.int_temp_type).getValue()) {
-				//se attuatori sportelli attivi
-				if(actuators.get(Constant.air_vents).getStatus()) {
-					//chiudo
-					reactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_off);	
-				} 
-			} else {
-				//se attuatori sportelli chiusi
-				if(!actuators.get(Constant.air_vents).getStatus()) {
-					//apro
-					reactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_on);	
+			System.out.println("Temperatura Alta");
+			
+			if(!(states.get(Constant.wind_type) == Constant.wind_danger)) {
+				System.out.println("Vento non Forte");
+				//se temperatura esterna > temperatura interna
+				if(sensors.get(Constant.ext_temp_type).getValue() >
+						sensors.get(Constant.int_temp_type).getValue()) {
+					//se attuatori sportelli attivi
+					System.out.println("Esterna > Interna");
+					if(actuators.get(Constant.air_vents).getStatus()) {
+						System.out.println("Attuatori aperti, li chiudo");
+						//chiudo
+						reactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_off);	
+					} 
+				} else {
+					System.out.println("Esterna <= Interna");
+					//se attuatori sportelli chiusi
+					if(!actuators.get(Constant.air_vents).getStatus()) {
+						System.out.println("Attuatori Chiusi, li apro");
+						//apro
+						reactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_on);	
+					}
 				}
 			}
+			
 			//se luce è buona
 			if(states.get(Constant.light_type) == Constant.good_light ) {
+				System.out.println("Luce Buona");
 				//se attuatori reti disattivate
 				if(!actuators.get(Constant.net).getStatus()) {
+					System.out.println("Reti chiuse, le apro");
 					//apro
 					reactions.add(Constant.net + Constant.positive_separator + Constant.planner_on);	
 				}
 			}
 		}
+		System.out.println("***********************");
+		System.out.println("REAZIONI: " + reactions);
+		System.out.println("***********************");
 		return reactions;
 	}
 	
@@ -84,16 +107,19 @@ public class Planner {
 		
 		ArrayList <String> reactions = new ArrayList<String>();
 		
-		if(problem == Constant.low_int_hum){								
+		if(problem == Constant.low_int_hum){	
+			System.out.println("Umidità Bassa");
 			//se umidità esterna < umidità interna
 			if(sensors.get(Constant.ext_hum_type).getValue() <=
 					sensors.get(Constant.int_hum_type).getValue()) {
+				System.out.println("Esterna <= Interna ---- Umidità");
 				//se attuatori sportelli attivi
 				if(actuators.get(Constant.air_vents).getStatus()) {
 					//chiudo
 					reactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_off);	
 				}
 			} else {
+				System.out.println("Esterna > Interna ---- Umidità");
 				//se attuatori sportelli chiusi
 				if(!actuators.get(Constant.air_vents).getStatus()) {
 					//apro
@@ -101,16 +127,18 @@ public class Planner {
 				}
 			}
 		}else if(problem == Constant.high_int_hum){
-			
+			System.out.println("Umidità Alta");
 			//se temperatura esterna > temperatura interna
 			if(sensors.get(Constant.ext_temp_type).getValue() >
 					sensors.get(Constant.int_temp_type).getValue()) {
+				System.out.println("Esterna > Interna ---- Umidità");
 				//se attuatori sportelli attivi
 				if(actuators.get(Constant.air_vents).getStatus()) {
 					//chiudo
 					reactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_off);	
 				}
 			} else {
+				System.out.println("Esterna <= Interna ---- Umidità");
 				//se attuatori sportelli chiusi
 				if(!actuators.get(Constant.air_vents).getStatus()) {
 					//apro
@@ -176,9 +204,9 @@ public class Planner {
 								System.out.println("Still working for humidity...");	
 							}						
 							
-							this.checkReactiveHumidityUpdates(gh_states.get(plan.getType()), 
-															  sensors_per_greenhouse.get(entry.getKey()), 
-															  actuators.get(entry.getKey()));
+							//this.checkReactiveHumidityUpdates(gh_states.get(plan.getType()), 
+							//								  sensors_per_greenhouse.get(entry.getKey()), 
+							//								  actuators.get(entry.getKey()));
 							
 							gh_states.remove(Constant.int_hum_type);
 							break;
@@ -251,11 +279,6 @@ public class Planner {
 								
 								actions.get(entry.getKey()).add(Constant.net + Constant.positive_separator + Constant.planner_on);
 							}
-							/* 
-							db.insertPlan(entry.getKey(), Constant.light_type, true,
-										sensors_per_greenhouse.get(entry.getKey()).get(Constant.light_type).getValue(), problem.getValue());
-							actions.get(entry.getKey()).add(Constant.net+Constant.positive_separator+Constant.planner_on);
-							 */
 						}
 							
 					// Umidità del Terreno
@@ -266,11 +289,6 @@ public class Planner {
 								
 								actions.get(entry.getKey()).add(Constant.sprinkler + Constant.positive_separator + Constant.planner_on);
 							}
-							/*
-							db.insertPlan(entry.getKey(), Constant.terrain_hum_type, false,
-										sensors_per_greenhouse.get(entry.getKey()).get(Constant.terrain_hum_type).getValue(), problem.getValue());
-							actions.get(entry.getKey()).add(Constant.sprinkler+Constant.positive_separator+Constant.planner_on);
-							*/
 						}
 							
 					//Vento
@@ -281,18 +299,8 @@ public class Planner {
 								
 								actions.get(entry.getKey()).add(Constant.air_vents + Constant.positive_separator + Constant.planner_off);
 							}
-							/*
-							db.insertPlan(entry.getKey(), 
-										  Constant.wind_type, 
-										  true,
-										  sensors_per_greenhouse.get(entry.getKey()).get(Constant.wind_type).getValue(), 
-										  problem.getValue());
-							*/
 						}else{
-							/* VALUTO SE APRIRE O MENO GLI SPORTELLI
-							actions.get(entry.getKey()).add(windAdvantage(greenhouse_states.get(entry.getKey()).get(Constant.int_temp_type),
-									greenhouse_states.get(entry.getKey()).get(Constant.int_hum_type),sensors_per_greenhouse.get(entry.getKey())));
-							*/
+							/* VALUTO SE APRIRE O MENO GLI SPORTELLI*/
 						}
 					}		
 				}		
@@ -304,6 +312,9 @@ public class Planner {
 			 * 
 			 * */
 		}	
+		System.out.println("+++++++++++++++++++");
+		System.out.println("ACTIONS: " + actions);
+		System.out.println("+++++++++++++++++++");
 	}
 	
 	public String windAdvantage(Integer temp_state, Integer hum_state, HashMap<String, Sensor> sensors){

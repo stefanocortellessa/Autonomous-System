@@ -47,8 +47,8 @@ public class PahoCommunicator implements MqttCallback {
 
 	public void messageArrived(String topic, MqttMessage message) throws Exception {
 
-		System.out.println("A new message arrived from the topic: \"" + topic + "\". The payload of the message is "
-				+ message.toString());
+		//System.out.println("A new message arrived from the topic: \"" + topic + "\". The payload of the message is "
+		//		+ message.toString());
 
 		messages.putIfAbsent(c.get(), new String());
 		messages.replace(c.get(), message.toString());

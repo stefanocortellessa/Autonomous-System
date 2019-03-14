@@ -19,9 +19,9 @@ public class Monitor extends Thread{
     
 	private Analyzer analyzer = new Analyzer();
 	private HashMap<Integer, String> currentMode = new HashMap<Integer, String>();
-	private HashMap<Integer, String> topics = new HashMap<Integer, String>();
-	private HashMap<Integer, String> messages = new HashMap<Integer,String>();
-	private HashMap<Integer, String> modes = new HashMap<Integer,String>();
+	private Map<Integer, String> topics = new HashMap<Integer, String>();
+	private Map<Integer, String> messages = new HashMap<Integer,String>();
+	private Map<Integer, String> modes = new HashMap<Integer,String>();
     private PahoCommunicator paho = new PahoCommunicator(messages);
     private PahoCommunicator mode = new PahoCommunicator(modes, topics);
     private int idGh = 0;
@@ -111,24 +111,21 @@ public class Monitor extends Thread{
 			
 			for(Map.Entry<String, Actuator> acts : actuators.get(gh.getId()).entrySet()) {
 				
-				System.out.println("");
-				System.out.println("openHab/greenhouse/"+ acts.getValue().getIdGreenhouse() + "/actuator/" + acts.getValue().getType());
-				System.out.println("");
 				
 				if(acts.getValue().getType().equals("temp") || acts.getValue().getType().equals("hum")) {
 					paho.publish("openHab/greenhouse/"+ acts.getValue().getIdGreenhouse() + "/actuator/" + acts.getValue().getType(),  
 							acts.getValue().getPower() + "", 
 							Constant.monitor_sender);
-					System.out.println("VALORE TEMP || HUM: " + acts.getValue().getPower());
+					//System.out.println("VALORE TEMP || HUM: " + acts.getValue().getPower());
 				} else {
 					paho.publish("openHab/greenhouse/"+ acts.getValue().getIdGreenhouse() + "/actuator/" + acts.getValue().getType(),  
 							(acts.getValue().getStatus() ? 1 : 0) + "", 
 							Constant.monitor_sender);
-					System.out.println("VALORE :" + (acts.getValue().getStatus()));
+					//System.out.println("VALORE :" + (acts.getValue().getStatus()));
 				}
 			}
 		}
-		
+		System.out.println("TO ANALYZER: " + toAnalyzer);
     	//una volta generata la lista, viene mandata all'analyzer
 		analyzer.sensorValuesAnalysis(toAnalyzer, actuators, currentMode);
 		

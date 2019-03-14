@@ -64,7 +64,7 @@ public class DBManager {
 				ps.setString(1, email);
 				ps.setString(2, pwd);
 
-				System.out.println("User Inserted!");
+				//System.out.println("User Inserted!");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -598,7 +598,7 @@ public class DBManager {
 
 			for (int i = 0; i < actuators.size(); i++) {
 
-				System.out.println("ACTUATORS: " + actuators.get(i).getName());
+				//System.out.println("ACTUATORS: " + actuators.get(i).getName());
 			}
 
 			return actuators;
@@ -643,7 +643,7 @@ public class DBManager {
 			ps.setBoolean(4, status);
 			ps.setString(5, name);
 
-			System.out.println("Sensor Inserted!");
+			//System.out.println("Sensor Inserted!");
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -683,7 +683,7 @@ public class DBManager {
 			ps.setInt(5, id);
 
 			ps.executeUpdate();
-			System.out.println("Sensor Updated!");
+			//System.out.println("Sensor Updated!");
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -724,7 +724,7 @@ public class DBManager {
 			ps.setBoolean(4, status);
 			ps.setString(5, name);
 
-			System.out.println("Actuator Inserted!");
+			//System.out.println("Actuator Inserted!");
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -764,7 +764,7 @@ public class DBManager {
 			ps.setInt(5, id);
 
 			ps.executeUpdate();
-			System.out.println("Actuator Updated!");
+			//System.out.println("Actuator Updated!");
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -799,7 +799,7 @@ public class DBManager {
 		try {
 			if (type.equals("temp") || type.equals("hum")) {
 				
-				System.out.println("TIPO: " + type);
+				//System.out.println("TIPO: " + type);
 				connection = this.getConnection(connection);
 				ps = connection.prepareStatement(sql);
 
@@ -809,10 +809,10 @@ public class DBManager {
 				ps.setInt(4, idGh);
 				
 				ps.executeUpdate();
-				System.out.println("Actuator Updated!");
+				//System.out.println("Actuator Updated!");
 			} else {
 				
-				System.out.println("TIPO: " + type);
+				//System.out.println("TIPO: " + type);
 				connection = this.getConnection(connection);
 				ps = connection.prepareStatement(sql2);
 
@@ -821,7 +821,7 @@ public class DBManager {
 				ps.setInt(3, idGh);
 				
 				ps.executeUpdate();
-				System.out.println("Actuator Updated!");
+				//System.out.println("Actuator Updated!");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

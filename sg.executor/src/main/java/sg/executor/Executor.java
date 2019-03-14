@@ -37,9 +37,9 @@ public class Executor extends Thread {
 	
 	public void updateValues() throws MqttException {
 		
-		System.out.println("");
-		System.out.println("RETRIEVE VALUES");
-		System.out.println("");
+		//System.out.println("");
+		//System.out.println("RETRIEVE VALUES");
+		//System.out.println("");
 		
 		int idGh = 0;
 		String actuatorType = "";

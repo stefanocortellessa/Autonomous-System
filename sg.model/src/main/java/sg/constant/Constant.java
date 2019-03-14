@@ -5,6 +5,7 @@ public final class Constant {
 	// ids mqtt
 	public static final String monitor_receiver = "monitor_receiver";
 	public static final String monitor_sender = "monitor_sender";
+	public static final String mode_receiver = "mode_receiver";
 	public static final String executor_sender = "executor_sender";
 	public static final String executor_receiver = "executor_receiver";
 	public static final String simulator_sender = "simulator_sender";
@@ -12,6 +13,7 @@ public final class Constant {
 	public static final String actuator_channel = "monitor/greenhouse/+/actuator/";
 	public static final String simulator_channel = "monitor/simulator";
 	public static final String executor_channel = "openHab/executor/greenhouse/+/actuator/#";
+	public static final String mode_channel = "openHab/mode";
 	public static final String int_temp_type = "intTemp";
 	public static final String ext_temp_type = "extTemp";
 	public static final String ext_hum_type = "extHum";

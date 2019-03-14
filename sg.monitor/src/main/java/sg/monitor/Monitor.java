@@ -17,10 +17,14 @@ public class Monitor extends Thread{
 	
 	private volatile boolean active = true;
     
-	private Map<Integer, String> messages = new HashMap<Integer,String>();
+	private Analyzer analyzer = new Analyzer();
+	private HashMap<Integer, String> currentMode = new HashMap<Integer, String>();
+	private HashMap<Integer, String> topics = new HashMap<Integer, String>();
+	private HashMap<Integer, String> messages = new HashMap<Integer,String>();
+	private HashMap<Integer, String> modes = new HashMap<Integer,String>();
     private PahoCommunicator paho = new PahoCommunicator(messages);
-    
-    private Analyzer analyzer = new Analyzer();
+    private PahoCommunicator mode = new PahoCommunicator(modes, topics);
+    private int idGh = 0;
     
     private HashMap<Integer, HashMap<String, Actuator>> actuators = new HashMap<Integer, HashMap<String, Actuator>>();
     private ArrayList<Greenhouse> greenhouses = new ArrayList<Greenhouse>();
@@ -29,10 +33,19 @@ public class Monitor extends Thread{
     public void run() {
     	
     	paho.subscribe(Constant.monitor_channel, Constant.monitor_receiver);
+    	mode.subscribe(Constant.mode_channel, Constant.mode_receiver);
+    	
+    	
+    	for (Map.Entry<Integer, String> mode : modes.entrySet()) {
+    		if(mode.getValue() != null) {
+    			
+    			currentMode.put(new Integer(topics.get(mode.getKey())), mode.getValue());
+    		}
+    	}
     	
         while (active) {
 				try {
-					this.receiveSensorValues();
+					this.receiveSensorValues(currentMode);
 	    			Thread.sleep(Constant.thread_activation);
 
 				} catch (Exception e) {
@@ -41,7 +54,7 @@ public class Monitor extends Thread{
         }
 	}
     
-	private void receiveSensorValues(){
+	private void receiveSensorValues(HashMap<Integer, String> currentMode){
 		
 		/*
 		 * to Analyzer = Integer -> id greenhouse, ArrayList -> lista dei sensori
@@ -117,7 +130,7 @@ public class Monitor extends Thread{
 		}
 		
     	//una volta generata la lista, viene mandata all'analyzer
-		analyzer.sensorValuesAnalysis(toAnalyzer, actuators);
+		analyzer.sensorValuesAnalysis(toAnalyzer, actuators, currentMode);
 		
 		messages.clear();
 		paho = new PahoCommunicator(messages);

@@ -15,7 +15,8 @@ public class Analyzer {
 	private Planner planner = new Planner();
 
 	public void sensorValuesAnalysis(Map<Integer, HashMap<String, Sensor>> sensors_per_greenhouse,
-			HashMap<Integer, HashMap<String, Actuator>> actuators) {
+			HashMap<Integer, HashMap<String, Actuator>> actuators,
+			HashMap<Integer, String> currentModes) {
 
 		Map<Integer, HashMap<String, Integer>> greenhouse_problems = new HashMap<Integer, HashMap<String, Integer>>();
 		for (Map.Entry<Integer, HashMap<String, Sensor>> entry : sensors_per_greenhouse.entrySet()) {
@@ -141,11 +142,8 @@ public class Analyzer {
 
 			}
 		}
-
-		// PASSARE QUI IL AL PLANNER greenhouse_problems CONTENENTE I CODICI DELLE
-		// SITUAZIONI ATTUALI
-
-		planner.planning(greenhouse_problems, sensors_per_greenhouse, actuators);
+		
+		planner.planning(greenhouse_problems, sensors_per_greenhouse, actuators, currentModes);
 
 		System.out.println("");
 	}

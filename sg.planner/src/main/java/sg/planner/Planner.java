@@ -6,6 +6,7 @@ import java.util.Map;
 
 import sg.actuator.Actuator;
 import sg.constant.Constant;
+import sg.executor.Executor;
 import sg.mysqldb.DBManager;
 import sg.sensor.Sensor;
 import sg.plan.Plan;
@@ -15,6 +16,7 @@ public class Planner {
 
 	private DBManager db = new DBManager();
 	private Random rnd = new Random();
+	private Executor executor = new Executor();
 
 	// Controllo se ci sono possibili azioni reattive per l'umidità
 	public ArrayList<String> checkReactiveTemperatureUpdates(
@@ -159,7 +161,7 @@ public class Planner {
 						HashMap<String, Actuator> actuators,
 						int power) {
 
-		ArrayList<String> ecoReactions = new ArrayList<String>();
+		ArrayList<String> reactions = new ArrayList<String>();
 		System.out.println("ECO Modality Activated!");
 		
 		//UMIDITà
@@ -172,11 +174,11 @@ public class Planner {
 				
 				if (!actuators.get(Constant.air_vents).getStatus()) {
 					
-					ecoReactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_on);
+					reactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_on);
 				}else {
 					//accendo il deumificatore a 1
-					ecoReactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_off);
-					ecoReactions.add(Constant.humidifier + Constant.positive_separator + (power));
+					reactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_off);
+					reactions.add(Constant.humidifier + Constant.positive_separator + (power));
 				}
 			} 
 			//supero la soglia
@@ -189,11 +191,11 @@ public class Planner {
 				if (!actuators.get(Constant.air_vents).getStatus()) {
 
 					// attivo
-					ecoReactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_on);
+					reactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_on);
 				} else {
 					//accendo il deumificatore a -1
-					ecoReactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_off);
-					ecoReactions.add(Constant.humidifier + Constant.positive_separator + (-power));
+					reactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_off);
+					reactions.add(Constant.humidifier + Constant.positive_separator + (-power));
 				}
 			} 
 		//TEMPERATURA
@@ -206,11 +208,11 @@ public class Planner {
 				
 				if (!actuators.get(Constant.air_vents).getStatus()) {
 					
-					ecoReactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_on);
+					reactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_on);
 				} else {
 					//accendo il condizionatore a 1
-					ecoReactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_off);
-					ecoReactions.add(Constant.conditioner + Constant.positive_separator + (power));
+					reactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_off);
+					reactions.add(Constant.conditioner + Constant.positive_separator + (power));
 				}
 			} 
 		//supero la soglia
@@ -223,19 +225,19 @@ public class Planner {
 				if (!actuators.get(Constant.air_vents).getStatus()) {
 
 					// attivo
-					ecoReactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_on);
+					reactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_on);
 				}else {
 					//System.out.println("Esterna > Interna");
 					//accendo il deumificatore a -1
-					ecoReactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_off);
-					ecoReactions.add(Constant.conditioner + Constant.positive_separator + (-power));
+					reactions.add(Constant.air_vents + Constant.positive_separator + Constant.planner_off);
+					reactions.add(Constant.conditioner + Constant.positive_separator + (-power));
 				}
 			} 
 		}
 		//System.out.println("***********************");
 		//System.out.println("REAZIONI ECO MODE: " + ecoReactions);
 		//System.out.println("***********************");
-		return ecoReactions;
+		return reactions;
 	}
 
 	public void normalModality() {
@@ -259,7 +261,7 @@ public class Planner {
 			Map<Integer, HashMap<String, Actuator>> actuators, 
 			HashMap<Integer, String> currentModes) {
 
-		Map<Integer, ArrayList<String>> actions = new HashMap<Integer, ArrayList<String>>();
+		HashMap<Integer, ArrayList<String>> actions = new HashMap<Integer, ArrayList<String>>();
 
 		for (Map.Entry<Integer, HashMap<String, Integer>> entry : greenhouse_states.entrySet()) {
 
@@ -615,6 +617,8 @@ public class Planner {
 				}
 			}
 		}
+		
+		executor.executor(actions);
 		System.out.println("+++++++++++++++++++");
 		System.out.println("ACTIONS: " + actions);
 		System.out.println("+++++++++++++++++++");

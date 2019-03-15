@@ -1,15 +1,15 @@
 package sg.activator;
 
-import sg.executor.Executor;
 import sg.monitor.Monitor;
 import sg.simulator.Simulator;
+import sg.updater.Updater;
 
 public class Activator{
 	public static void main(String[] args) throws InterruptedException {
 			
 		Simulator simulator = new Simulator();
 		Monitor monitor = new Monitor();
-		Executor executor = new Executor();
+		Updater executor = new Updater();
 		
 		simulator.start();
 		monitor.start();

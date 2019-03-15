@@ -1,9 +1,5 @@
 package sg.constant;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-
 public final class Constant {
 
 	// ids mqtt
@@ -13,9 +9,12 @@ public final class Constant {
 	public static final String executor_sender = "executor_sender";
 	public static final String executor_receiver = "executor_receiver";
 	public static final String simulator_sender = "simulator_sender";
+	public static final String updater_receiver = "updater_receiver";
+	public static final String updater_sender = "updater_sender";
 	public static final String monitor_channel = "monitor/greenhouse/+/sensor/#";
 	public static final String actuator_channel = "monitor/greenhouse/+/actuator/";
 	public static final String simulator_channel = "monitor/simulator";
+	public static final String updater_channel = "openHab/executor/greenhouse/+/actuator/#";
 	public static final String executor_channel = "openHab/executor/greenhouse/+/actuator/#";
 	public static final String mode_channel = "openHab/mode";
 	public static final String int_temp_type = "intTemp";

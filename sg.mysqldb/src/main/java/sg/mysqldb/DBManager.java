@@ -790,39 +790,23 @@ public class DBManager {
 	// così come l'id
 	public void updateActuatorPower(int power, String type, int idGh) {
 
-		String sql = "UPDATE actuator SET power=?, status=? WHERE type=? AND id_greenhouse=?";
-		String sql2 = "UPDATE actuator SET status=? WHERE type=?  AND id_greenhouse=?";
+		String sql2 = "UPDATE actuator SET power=? WHERE type=?  AND id_greenhouse=?";
 		
 		PreparedStatement ps = null;
 		Connection connection = null;
 
 		try {
-			if (type.equals("temp") || type.equals("hum")) {
-				
-				//System.out.println("TIPO: " + type);
-				connection = this.getConnection(connection);
-				ps = connection.prepareStatement(sql);
+			//System.out.println("TIPO: " + type);
+			connection = this.getConnection(connection);
+			ps = connection.prepareStatement(sql2);
 
-				ps.setInt(1, power);
-				ps.setInt(2, 1);
-				ps.setString(3, type);
-				ps.setInt(4, idGh);
-				
-				ps.executeUpdate();
-				//System.out.println("Actuator Updated!");
-			} else {
-				
-				//System.out.println("TIPO: " + type);
-				connection = this.getConnection(connection);
-				ps = connection.prepareStatement(sql2);
-
-				ps.setInt(1, power);
-				ps.setString(2, type);
-				ps.setInt(3, idGh);
-				
-				ps.executeUpdate();
-				//System.out.println("Actuator Updated!");
-			}
+			ps.setInt(1, power);
+			ps.setString(2, type);
+			ps.setInt(3, idGh);
+			
+			ps.executeUpdate();
+			//System.out.println("Actuator Updated!");
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 			System.out.println("Actuator NOT Updated!");

@@ -1,62 +1,35 @@
 package sg.executor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import sg.constant.Constant;
-import sg.mysqldb.DBManager;
 import sg.paho.PahoCommunicator;
-
-import org.eclipse.paho.client.mqttv3.MqttException;
 
 public class Executor extends Thread {
 
-	private Map<Integer, String> values = new HashMap<Integer, String>();
-	private Map<Integer, String> topics = new HashMap<Integer, String>();
 	
-	private PahoCommunicator paho = new PahoCommunicator(values, topics);
-	private DBManager dbm = new DBManager();
-	
-	public void run() {
+	private Map<Integer, String> messages = new HashMap<Integer,String>();
+    private PahoCommunicator paho = new PahoCommunicator(messages);
 
-		paho.subscribe("openHab/executor/greenhouse/+/actuator/#", Constant.executor_receiver);
-		
-		while (true) {
-			try {
-				
-				this.updateValues();
-				
-				Thread.sleep(1000);
-				
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
+	public void executor(HashMap<Integer, ArrayList<String>> actions) {
 
-	
-	public void updateValues() throws MqttException {
-		
-		//System.out.println("");
-		//System.out.println("RETRIEVE VALUES");
-		//System.out.println("");
-		
-		int idGh = 0;
-		String actuatorType = "";
-		
-		if (!values.isEmpty()) {
-			if(!topics.isEmpty()) {				
-				
-				//System.out.println("MESSAGES: " + messages + ", TOPICS: " + topics );
-				for(Map.Entry<Integer, String> tops : topics.entrySet()) {
+		for (Map.Entry<Integer, ArrayList<String>> action : actions.entrySet()) {
+
+			if (!(action.getValue().isEmpty())) {
+				for (String act : action.getValue()) {
+
+					String type = Constant.parse_message(act)[0];
+					int power = Integer.parseInt(Constant.parse_message(act)[1]);
+															
+															//idGh
+					paho.publish("executor/greenhouse/" + action.getKey() + "/actuator/"+ type,  
+							power+"", 
+							Constant.executor_sender);
 					
-					idGh = Constant.get_id_greenhouse(tops.getValue());
-					actuatorType = Constant.get_actuator_type(tops.getValue());
-					dbm.updateActuatorPower( Integer.parseInt(values.get(tops.getKey())), actuatorType, idGh);
+					//dbm.updateActuatorPower(power, type, action.getKey());
 				}
-				values.clear();
-				topics.clear();
-				paho = new PahoCommunicator(values, topics);
 			}
 		}
 	}

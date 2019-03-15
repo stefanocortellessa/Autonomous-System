@@ -267,10 +267,6 @@ public class Planner {
 			actions.putIfAbsent(entry.getKey(), new ArrayList<String>());
 			ArrayList<Plan> active_plans = db.selectActivePlans(entry.getKey());
 
-			if (!(gh_states.get(Constant.wind_type) == Constant.wind_danger)) {
-
-			}
-
 			/*
 			if (active_plans.size() > 0) {
 				for (Plan plan : active_plans) {

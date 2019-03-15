@@ -26,7 +26,7 @@ public class Executor extends Thread {
 				
 				this.updateValues();
 				
-				Thread.sleep(Constant.thread_activation);
+				Thread.sleep(1000);
 				
 			} catch (Exception e) {
 				e.printStackTrace();

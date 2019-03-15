@@ -46,7 +46,7 @@ public class Monitor extends Thread{
         while (active) {
 				try {
 					this.receiveSensorValues(currentMode);
-	    			Thread.sleep(Constant.thread_activation);
+	    			Thread.sleep(2500);
 
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -125,7 +125,7 @@ public class Monitor extends Thread{
 				}
 			}
 		}
-		System.out.println("TO ANALYZER: " + toAnalyzer);
+		//System.out.println("TO ANALYZER: " + toAnalyzer);
     	//una volta generata la lista, viene mandata all'analyzer
 		analyzer.sensorValuesAnalysis(toAnalyzer, actuators, currentMode);
 		

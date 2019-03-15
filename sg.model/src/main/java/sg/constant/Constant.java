@@ -1,5 +1,9 @@
 package sg.constant;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+
 public final class Constant {
 
 	// ids mqtt
@@ -75,8 +79,10 @@ public final class Constant {
 	// danger limits
 	public static final int danger_temp_limit = 5;
 	public static final int danger_hum_limit = 20;
-
+	
 	public static final int thread_activation = 5000;
+	
+	
 
 	public final static String[] parse_message(String s) {
 		return s.split(",");

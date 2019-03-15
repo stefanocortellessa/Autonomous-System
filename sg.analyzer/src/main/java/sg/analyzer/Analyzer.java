@@ -27,7 +27,7 @@ public class Analyzer {
 			for (Map.Entry<String, Sensor> s_entry : entry.getValue().entrySet()) {
 				
 				Sensor sensor = s_entry.getValue();
-				System.out.println("SENSORI: " + sensor.getType());
+				//System.out.println("SENSORI: " + sensor.getType());
 				switch (sensor.getType()) {
 
 				case (Constant.int_temp_type):

@@ -64,6 +64,7 @@ public class PahoCommunicator implements MqttCallback {
 			client.connect();
 
 			MqttMessage message = new MqttMessage();
+			message.setQos(2);
 			message.setPayload(mess.getBytes());
 			client.publish(channel, message);
 			// client.disconnect();

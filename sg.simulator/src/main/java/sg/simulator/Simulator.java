@@ -41,9 +41,9 @@ public class Simulator extends Thread {
 
 				// aggiungiamo 30 minuti ogni thread che parte
 				clock.add(Calendar.MINUTE, 30);
-				System.out.println("------------");
-				System.out.println("CLOCK: " + clock.get(Calendar.HOUR_OF_DAY) + ":" + clock.get(Calendar.MINUTE));
-				System.out.println("------------");
+				//System.out.println("------------");
+				//System.out.println("CLOCK: " + clock.get(Calendar.HOUR_OF_DAY) + ":" + clock.get(Calendar.MINUTE));
+				//System.out.println("------------");
 				hour = clock.get(Calendar.HOUR_OF_DAY);
 
 				this.simulation();
@@ -67,7 +67,7 @@ public class Simulator extends Thread {
 
 		for (Greenhouse gh : greenhouses) {
 
-			System.out.println("id_greenhouse: " + gh.getId());
+			//System.out.println("id_greenhouse: " + gh.getId());
 			sensors.put(gh.getId(), dbm.selectGreenhouseSensors(gh.getId()));
 			actuators.put(gh.getId(), dbm.selectGreenhouseActuatorsType(gh.getId()));
 		}
@@ -141,21 +141,22 @@ public class Simulator extends Thread {
 						sns.getStatus(), sns.getName());
 			}
 		}
-
+		
+		
 		paho.publish("monitor/greenhouse/"+ sns.getIdGreenhouse() +"/sensor/" + sns.getType(),
 				sns.getId() + "," + sns.getName() + "," + sns.getType() + "," + sns.getValue() + ","
 						+ sns.getIdGreenhouse(),
 				Constant.simulator_sender);
 		if(sns.getType().equals("light"))
 		{
-			System.out.println("------------------------------------");
-			System.out.println("GREENHOUSE   "+sns.getIdGreenhouse() +"      TIPO : "+sns.getType()+"   VALOREEEE:   "+sns.getValue());
-			System.out.println("------------------------------------");
+			//System.out.println("------------------------------------");
+			//System.out.println("GREENHOUSE   "+sns.getIdGreenhouse() +"      TIPO : "+sns.getType()+"   VALOREEEE:   "+sns.getValue());
+			//System.out.println("------------------------------------");
 			
 		}
 		
 
-		System.out.println("ORARIO: " + this.hour);
+		//System.out.println("ORARIO: " + this.hour);
 		String time = this.formatTime(clock.get(Calendar.HOUR_OF_DAY), clock.get(Calendar.MINUTE));
 		
 		paho.publish("openHab/greenhouse/time",
@@ -243,7 +244,7 @@ public class Simulator extends Thread {
 		this.intHum = 0;
 
 		if (actuators.get("wind").getStatus()) {
-			System.out.println("Sportello attivo");
+			//System.out.println("Sportello attivo");
 			if (this.extHum > precIntValue) {
 				this.intHum = (this.extHum - precIntValue) / 5;
 			} else {
@@ -360,7 +361,7 @@ public class Simulator extends Thread {
 
 		if (this.extTemp > precIntValue) {
 			
-			System.out.println("VENTO Esterna: " + this.extWind);
+			//System.out.println("VENTO Esterna: " + this.extWind);
 			switch (this.extWind) {
 			case 1:
 				w = 0.03;
@@ -424,7 +425,7 @@ public class Simulator extends Thread {
 		this.intTemp += ((0 + (actuators.get("temp").getStatus() ? 1 : 0)) * (1.5 * actuators.get("temp").getPower()));
 		  
 		this.intTemp = this.roundingUp(this.intTemp, 2);
-		System.out.println("TEMPERATURA INTERNA: " + this.intTemp);
+		//System.out.println("TEMPERATURA INTERNA: " + this.intTemp);
 		
 		return this.intTemp;
 	}
@@ -479,6 +480,7 @@ public class Simulator extends Thread {
 		} else if (this.hour >= 20 && this.hour <= 21) {
 			this.extLight = l.nextInt(2);
 		}
+		
 		return this.extLight;
 	}
 

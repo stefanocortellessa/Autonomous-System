@@ -1,5 +1,6 @@
 package sg.analyzer;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,139 +16,130 @@ public class Analyzer {
 	private Planner planner = new Planner();
 
 	public void sensorValuesAnalysis(Map<Integer, HashMap<String, Sensor>> sensors_per_greenhouse,
-			HashMap<Integer, HashMap<String, Actuator>> actuators,
-			HashMap<Integer, String> currentModes) {
+			Map<Integer, HashMap<String, Actuator>> actuators,
+			HashMap<Integer, String> currentModes, Calendar clock) {
 
+		
 		Map<Integer, HashMap<String, Integer>> greenhouse_problems = new HashMap<Integer, HashMap<String, Integer>>();
+		
 		for (Map.Entry<Integer, HashMap<String, Sensor>> entry : sensors_per_greenhouse.entrySet()) {
-			
 			Greenhouse gh = db.selectGreenhouseById(entry.getKey());
 			greenhouse_problems.put(gh.getId(), new HashMap<String, Integer>());
 
+			/* ricavo dai dati dei sensori i codici di stato della serra, in modo da identificarne anticipatamente 
+			 * i vari problemi e facilitare il lavoro del planner */
 			for (Map.Entry<String, Sensor> s_entry : entry.getValue().entrySet()) {
-				
 				Sensor sensor = s_entry.getValue();
-				//System.out.println("SENSORI: " + sensor.getType());
 				switch (sensor.getType()) {
 
+				//temperatura
 				case (Constant.int_temp_type):
-					if (sensor.getValue() <= (gh.getOpt_temp() - gh.getRange_temp() - Constant.danger_temp_limit)) {
-
+					//stati di pericolo
+					if (sensor.getValue() <= (gh.getOpt_temp() - Constant.optimal_margin - gh.getRange_temp() - Constant.danger_limit)) {
 						greenhouse_problems.get(gh.getId()).put(Constant.int_temp_type, Constant.danger_low_int_temp);
-						//System.out.println("Danger: Low Temperature");
-
-					} else if (sensor
-							.getValue() >= (gh.getOpt_temp() + gh.getRange_temp() + Constant.danger_temp_limit)) {
-
+					} else if (sensor.getValue() >= (gh.getOpt_temp() + Constant.optimal_margin + gh.getRange_temp() + Constant.danger_limit)) {
 						greenhouse_problems.get(gh.getId()).put(Constant.int_temp_type, Constant.danger_high_int_temp);
-						//System.out.println("Danger: High Temperature");
-
-					} else if (sensor.getValue() <= (gh.getOpt_temp() - gh.getRange_temp())) {
-
+					}
+					//stati di reazione  
+					else if (sensor.getValue() <= (gh.getOpt_temp() - Constant.optimal_margin - gh.getRange_temp())) {
 						greenhouse_problems.get(gh.getId()).put(Constant.int_temp_type, Constant.low_int_temp);
-						//System.out.println("Reaction Low Temperature");
-
-					} else if (sensor.getValue() >= (gh.getOpt_temp() + gh.getRange_temp())) {
+					} else if (sensor.getValue() >= (gh.getOpt_temp() + Constant.optimal_margin + gh.getRange_temp())) {
 						greenhouse_problems.get(gh.getId()).put(Constant.int_temp_type, Constant.high_int_temp);
-						//System.out.println("Reaction High Temperature");
-					} else if (sensor.getValue() <= (gh.getOpt_temp() - Constant.optimal_temp_margin)) {
-
+					}	
+					//stati di predizione 
+					else if (sensor.getValue() <= (gh.getOpt_temp() - Constant.optimal_margin)) {
 						greenhouse_problems.get(gh.getId()).put(Constant.int_temp_type, Constant.near_low_int_temp);
-						//System.out.println("Reaching Low Temperature");
-
-					} else if (sensor.getValue() >= (gh.getOpt_temp() + Constant.optimal_temp_margin)) {
+					} else if (sensor.getValue() >= (gh.getOpt_temp() + Constant.optimal_margin)) {
 						greenhouse_problems.get(gh.getId()).put(Constant.int_temp_type, Constant.near_high_int_temp);
-						//System.out.println("Reaching High Temperature");
-					} else {
-						// intervallo ottimo
+					} 
+					//stato ottimo
+					else {
 						greenhouse_problems.get(gh.getId()).put(Constant.int_temp_type, Constant.opt_int_temp_reach);
-						//System.out.println("Optima Internal Temperature Range Reached");
 					}
 					break;
 
+				//Umidità
 				case (Constant.int_hum_type):
-
-					if (sensor.getValue() <= (gh.getOpt_hum() - gh.getRange_hum() - Constant.danger_hum_limit)) {
-
+					//stati di pericolo
+					if (sensor.getValue() <= (gh.getOpt_hum() - Constant.optimal_margin - gh.getRange_hum() - Constant.danger_limit)) {
 						greenhouse_problems.get(gh.getId()).put(Constant.int_hum_type, Constant.danger_low_int_hum);
-						//System.out.println("Danger: Low Humidity");
-
-					} else if (sensor.getValue() >= (gh.getOpt_hum() + gh.getRange_hum() + Constant.danger_hum_limit)) {
-
+					} else if (sensor.getValue() >= (gh.getOpt_hum() + Constant.optimal_margin + gh.getRange_hum() + Constant.danger_limit)) {
 						greenhouse_problems.get(gh.getId()).put(Constant.int_hum_type, Constant.danger_high_int_hum);
-						//System.out.println("Danger: High Humidity");
-
-					} else if (sensor.getValue() <= (gh.getOpt_hum() - gh.getRange_hum())) {
-
+					} 
+					//stati di reazione
+					else if (sensor.getValue() <= (gh.getOpt_hum() - Constant.optimal_margin - gh.getRange_hum())) {
 						greenhouse_problems.get(gh.getId()).put(Constant.int_hum_type, Constant.low_int_hum);
-						//System.out.println("Reaction Low Humidity");
-
-					} else if (sensor.getValue() >= (gh.getOpt_hum() + gh.getRange_hum())) {
+					} else if (sensor.getValue() >= (gh.getOpt_hum() + Constant.optimal_margin + gh.getRange_hum())) {
 						greenhouse_problems.get(gh.getId()).put(Constant.int_hum_type, Constant.high_int_hum);
-						//System.out.println("Reaction High Humidity");
-					} else if (sensor.getValue() <= (gh.getOpt_hum() - Constant.optimal_hum_margin)) {
-
+					} 
+					//stati di predizione
+					else if (sensor.getValue() <= (gh.getOpt_hum() - Constant.optimal_margin)) {
 						greenhouse_problems.get(gh.getId()).put(Constant.int_hum_type, Constant.near_low_int_hum);
-						//System.out.println("Reaching Low Humidity");
-
-					} else if (sensor.getValue() >= (gh.getOpt_hum() + Constant.optimal_hum_margin)) {
+					} else if (sensor.getValue() >= (gh.getOpt_hum() + Constant.optimal_margin)) {
 						greenhouse_problems.get(gh.getId()).put(Constant.int_hum_type, Constant.near_high_int_hum);
-						//System.out.println("Reaching High Humidity");
-					} else {
-						// intervallo ottimo
+					}
+					//stato ottimo
+					else {
 						greenhouse_problems.get(gh.getId()).put(Constant.int_hum_type, Constant.opt_int_hum_reach);
-						//System.out.println("Optima Internal Humidity Range Reached");
 					}
 					break;
 
+				//luce esterna
 				case (Constant.light_type):
-					System.out.println("VALORE SENSORE: " + sensor.getValue());
-					if (sensor.getValue() == 3.0) {
 
+					//luce pericolosa
+					if (sensor.getValue() == 3) {
 						greenhouse_problems.get(gh.getId()).put(Constant.light_type, Constant.light_danger);
-						//System.out.println("Danger: High Light Intensity");
-					} else {
+					} 
+				
+					//luce assente
+					else if(sensor.getValue() == 0){
+						greenhouse_problems.get(gh.getId()).put(Constant.light_type, Constant.no_light);
+					}
+					
+					//luce moderata
+					else{
 						greenhouse_problems.get(gh.getId()).put(Constant.light_type, Constant.good_light);
-						//System.out.println("Good Internal Light Intensity Reached");
 					}
 					break;
 
+				//Umidità del terreno
 				case (Constant.terrain_hum_type):
 
-					if (sensor.getValue() <= (gh.getOpt_terrain_hum() - gh.getRange_terrain_hum())) {
-
+					//umidità del terreno insufficiente
+					if (sensor.getValue() <= gh.getOpt_terrain_hum() - gh.getRange_terrain_hum()) {
 						greenhouse_problems.get(gh.getId()).put(Constant.terrain_hum_type, Constant.low_int_terr_hum);
-						//System.out.println("Danger: Low Ground Humidity");
-					} else {
-
+					}
+					//umidità del terreno non ottimale
+					else if (sensor.getValue() <= (gh.getOpt_terrain_hum() - Constant.optimal_margin)) {
+						greenhouse_problems.get(gh.getId()).put(Constant.terrain_hum_type, Constant.near_low_int_hum);
+					}
+					//umidità del terreno ottimale
+					else {
 						greenhouse_problems.get(gh.getId()).put(Constant.terrain_hum_type,
 								Constant.opt_int_terr_hum_reach);
-						//System.out.println("Good Internal Ground Humidity Reached");
 					}
 					break;
 
-				default: // Constant.wind_type
+					
+				//Vento
+				case (Constant.wind_type):
+					
+					//vento pericoloso
 					if (sensor.getValue() == 3) {
-
 						greenhouse_problems.get(gh.getId()).put(Constant.wind_type, Constant.wind_danger);
-						//System.out.println("Danger: Wind too strong");
-
-					} else {
+					} 
+				
+					//vento non pericoloso
+					else {
 						greenhouse_problems.get(gh.getId()).put(Constant.wind_type, Constant.good_wind);
-						//System.out.println("Not dangerous wind");
 					}
 					break;
 				}
 			}
-
-			if (greenhouse_problems.get(gh.getId()) != null && greenhouse_problems.get(gh.getId()).size() > 0) {
-				System.out.println("Greenhouse " + gh.getId() + " Problems: " + greenhouse_problems.get(gh.getId()));
-
-			}
 		}
 		
-		planner.planning(greenhouse_problems, sensors_per_greenhouse, actuators, currentModes);
+		planner.planning(greenhouse_problems, sensors_per_greenhouse, actuators, currentModes, clock);
 
-		System.out.println("");
 	}
 }

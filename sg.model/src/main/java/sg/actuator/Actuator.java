@@ -10,18 +10,13 @@ public class Actuator {
 	private int idGreenhouse;
 	
 	public Actuator(){}
-	
-	public Actuator(int power,String type){
-		this.power = power;
-		this.type = type;
-	}
-	
-	public Actuator(int id, int power, String type, String name, boolean status, int idGreenhouse){
+
+	public Actuator(int id,  String type, String name, int power, int idGreenhouse){
 		this.id = id;
-		this.power = power;
 		this.type = type;
 		this.name = name;
-		this.status = status;
+		this.power = power;
+		this.status = true;
 		this.idGreenhouse = idGreenhouse;
 	}
 	

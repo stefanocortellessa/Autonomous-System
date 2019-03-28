@@ -1,135 +1,169 @@
 package sg.monitor;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import sg.constant.Constant;
 import sg.greenhouse.Greenhouse;
+import sg.knowledge.Knowledge;
 import sg.mysqldb.DBManager;
 import sg.paho.PahoCommunicator;
 import sg.sensor.Sensor;
 import sg.actuator.Actuator;
-import sg.analyzer.*;
+import sg.analyzer.Analyzer;
 
 
 public class Monitor extends Thread{
-	
-	private volatile boolean active = true;
-    
+
+	private ArrayList<Greenhouse> greenhouses = new ArrayList<Greenhouse>();
 	private Analyzer analyzer = new Analyzer();
-	private HashMap<Integer, String> currentMode = new HashMap<Integer, String>();
-	private Map<Integer, String> topics = new HashMap<Integer, String>();
-	private Map<Integer, String> messages = new HashMap<Integer,String>();
-	private Map<Integer, String> modes = new HashMap<Integer,String>();
-    private PahoCommunicator paho = new PahoCommunicator(messages);
-    private PahoCommunicator mode = new PahoCommunicator(modes, topics);
-    private int idGh = 0;
+	private DBManager dbm = new DBManager();
+	private HashMap<Integer, String> currentModes = new HashMap<Integer, String>();
+    private PahoCommunicator paho_sensors = new PahoCommunicator();
+    private PahoCommunicator paho_modes = new PahoCommunicator();
+    private PahoCommunicator paho_actuators  = new PahoCommunicator();
+    private PahoCommunicator paho_signal  = new PahoCommunicator();
+    private Calendar clock= Calendar.getInstance();
+    private Knowledge knowledge = new Knowledge();
     
-    private HashMap<Integer, HashMap<String, Actuator>> actuators = new HashMap<Integer, HashMap<String, Actuator>>();
-    private ArrayList<Greenhouse> greenhouses = new ArrayList<Greenhouse>();
-    private DBManager dbm = new DBManager();
+    
+    public Monitor(){
+    	//inizializzo il clock
+    	this.clock.set(Calendar.HOUR_OF_DAY, 0);
+    	this.clock.set(Calendar.MINUTE, 0);
+    	//imposto la modalità "NORMALE" come modalità standard di ogni serra.
+    	this.greenhouses = dbm.selectAllGreenhouses();
+    	for (Greenhouse gh : this.greenhouses){
+    		this.currentModes.put(gh.getId(), Constant.eco_mode);
+    	}
+    }
+    
     
     public void run() {
     	
-    	paho.subscribe(Constant.monitor_channel, Constant.monitor_receiver);
-    	mode.subscribe(Constant.mode_channel, Constant.mode_receiver);
-    	
-    	
-    	for (Map.Entry<Integer, String> mode : modes.entrySet()) {
-    		if(mode.getValue() != null) {
-    			
-    			currentMode.put(new Integer(topics.get(mode.getKey())), mode.getValue());
-    		}
-    	}
-    	
-        while (active) {
-				try {
-					this.receiveSensorValues(currentMode);
-	    			Thread.sleep(2500);
+    	//mi sottoscrivo al canale relativo ai sensori
+    	this.paho_sensors.subscribe(Constant.monitor_sensor_channel);
+    	//mi sottoscrivo al canale relativo alle modalità delle serre
+    	this.paho_modes.subscribe(Constant.mode_channel);
+    	//mi sottoscrivo al canale relativo agli attuatori
+    	this.paho_actuators.subscribe(Constant.monitor_actuator_channel);
+    	//mi sottoscrivo al canale del clock
+    	this.paho_signal.subscribe(Constant.clock_channel);
 
+        while (true) {
+        
+				try {
+					/*se è disponibile un messaggio su questo canale, vorrà dire che il ciclo di simulazione è terminato,
+					 * e sarà quindi possibile avviare la procedura di Monitor*/
+					if (!this.paho_signal.getMessages().isEmpty()){
+						this.receiveSensorValues();
+					}else{
+						Thread.sleep(1000);
+					}
+					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
         }
 	}
     
-	private void receiveSensorValues(HashMap<Integer, String> currentMode){
+	private void receiveSensorValues(){
 		
-		/*
-		 * to Analyzer = Integer -> id greenhouse, ArrayList -> lista dei sensori
-		 * scorro la lista dei messsaggi ricevuti dai canali dei sensori. 
-		 * creo la lista toAnalyzer che raccoglier� per ogni serra tutti i dati dei sensori ricevuti
-		 * riempio la lista generando la coppia chiave valore (con valore nullo) se la chiave � assente, e 
-		 * inserisco tutti i sensori come oggetti Sensor
-		 * */
-		Map<Integer, HashMap<String, Sensor>>  toAnalyzer = new HashMap<Integer, HashMap<String, Sensor>> (); 
-	    greenhouses = dbm.selectAllGreenhouses();
 		
-    	for (Map.Entry<Integer, String> entry : messages.entrySet()){
-    		if (entry.getValue() != null) {
+
+		Map<Integer, HashMap<String, Sensor>>  sensors = new HashMap<Integer, HashMap<String, Sensor>>(); 
+		
+		Map<Integer, HashMap<String, Actuator>> actuators = new HashMap<Integer, HashMap<String, Actuator>>();
+		this.paho_signal.getMessages().clear();
+		
+		for (Map.Entry<Integer, String> mode : this.paho_modes.getMessages().entrySet()) {
+    		if(mode.getValue() != null) {
+    			
+    			this.currentModes.put(Constant.get_id_greenhouse(this.paho_modes.getTopics().get(mode.getKey())),
+    			         mode.getValue());
+    		}
+    	}
+	    
+		//genero una mappa contenente i sensori di ogni serra
+    	for (Map.Entry<Integer, String> entry : this.paho_sensors.getMessages().entrySet()){
+    		if (entry.getValue()!=null) {
     			
     			String message = entry.getValue();
     			Sensor sns = new Sensor(
-    					Constant.get_sensor_id_from_message(message),
-						Constant.get_sensor_name_from_message(message),
-						Constant.get_sensor_type_from_message(message),
+    					Constant.get_element_id_from_message(message),
+						Constant.get_element_type_from_message(message),
+						Constant.get_element_name_from_message(message),
 						Constant.get_sensor_val_from_message(message),
 						Constant.get_gh_id_from_message(message));
     			
-				toAnalyzer.putIfAbsent(Constant.get_gh_id_from_message(message), new HashMap<String, Sensor>());
-				toAnalyzer.get(Constant.get_gh_id_from_message(message)).put(sns.getType(), sns);	
+				sensors.putIfAbsent(Constant.get_gh_id_from_message(message), new HashMap<String, Sensor>());
+				sensors.get(Constant.get_gh_id_from_message(message)).put(sns.getType(), sns);
 				
-				if(sns.getType().equals("rain")) {
-					if(sns.getValue() == 1) {
+				//invio ad openhab i valori dei sensori raccolti
+				this.paho_sensors.publish(Constant.openhab_sensor_channel.replace("+", Integer.toString(sns.getIdGreenhouse())).replace("#", sns.getType()),  
+							Double.toString(sns.getValue()));
+				
+				
+				
+			}
+		}
+    	
+  
+    	//genero una mappa contenente gli attuatori di ogni serra
+    	for (Map.Entry<Integer, String> entry : this.paho_actuators.getMessages().entrySet()){
+    		if (entry.getValue() != null) {
+    			
+    			String message = entry.getValue();
+    			Actuator act = new Actuator(
+    					Constant.get_element_id_from_message(message),
+    					Constant.get_element_type_from_message(message),
+						Constant.get_element_name_from_message(message),
+    					Constant.get_actuator_val_from_message(message),
+						Constant.get_gh_id_from_message(message));
+    			
+    		
+    			actuators.putIfAbsent(Constant.get_gh_id_from_message(message), new HashMap<String, Actuator>());
+				actuators.get(Constant.get_gh_id_from_message(message)).put(act.getType(), act);
 
-						paho.publish("openHab/greenhouse/" + sns.getIdGreenhouse() + "/sensor/"+ sns.getType(),  
-								"ON", 
-								Constant.monitor_sender);
-					} else {
-						paho.publish("openHab/greenhouse/" + sns.getIdGreenhouse() + "/sensor/"+ sns.getType(),  
-								"OFF", 
-								Constant.monitor_sender);
-					}
-				}else {
-					//vengono pubblicati i valori dei sensori sui diversi topic
-					paho.publish("openHab/greenhouse/" + sns.getIdGreenhouse() + "/sensor/"+ sns.getType(),  
-							sns.getValue() + "", 
-							Constant.monitor_sender);
-					
-					paho.publish("openHab/greenhouse/"+ sns.getIdGreenhouse() + "/actuator/" + sns.getType(),  
-							sns.getValue() + "", 
-							Constant.monitor_sender);
-				}
 			}
 		}
     	
-    	
-		for (Greenhouse gh : greenhouses) {
+    	//elimino i messaggi ricevuti dagli oggetti Paho
+    	this.paho_sensors.getMessages().clear();
+    	this.paho_actuators.getMessages().clear();
+		this.paho_modes.getMessages().clear();
 		
-			actuators.put(gh.getId(), dbm.selectGreenhouseActuatorsType(gh.getId()));
-			
-			for(Map.Entry<String, Actuator> acts : actuators.get(gh.getId()).entrySet()) {
+		/*controllo se sono stati raccolti correttamente tutti i sensori e gli attuatori. In caso contrario,
+		verrà notificato su OpenHab e quella serra non verrà analizzata*/
+		Iterator<Map.Entry<Integer, HashMap<String, Sensor>>> s_iterator = sensors.entrySet().iterator();
+		
+        while (s_iterator.hasNext()) { 
+        	boolean cLoss = true;
+        	Map.Entry<Integer, HashMap<String, Sensor>> entry = s_iterator.next(); 
+           
+        	if (entry.getValue().size() != 8) cLoss = false;
+        	if (actuators.get(entry.getKey()).size()!= 5)cLoss = false;
+        	
+        	if(!cLoss){
+        		
+				this.paho_signal.publish(Constant.alert_channel.replace("#", Integer.toString(entry.getKey())), "1");
+				s_iterator.remove();
+				actuators.remove(actuators.get(entry.getKey()));
+			}else{
 				
-				
-				if(acts.getValue().getType().equals("temp") || acts.getValue().getType().equals("hum")) {
-					paho.publish("openHab/greenhouse/"+ acts.getValue().getIdGreenhouse() + "/actuator/" + acts.getValue().getType(),  
-							acts.getValue().getPower() + "", 
-							Constant.monitor_sender);
-					//System.out.println("VALORE TEMP || HUM: " + acts.getValue().getPower());
-				} else {
-					paho.publish("openHab/greenhouse/"+ acts.getValue().getIdGreenhouse() + "/actuator/" + acts.getValue().getType(),  
-							(acts.getValue().getStatus() ? 1 : 0) + "", 
-							Constant.monitor_sender);
-					//System.out.println("VALORE :" + (acts.getValue().getStatus()));
-				}
+				this.paho_signal.publish(Constant.alert_channel.replace("#", Integer.toString(entry.getKey())), "0");
 			}
+        } 
+        
+		if(!(sensors.isEmpty() || actuators.isEmpty())){
+			this.knowledge.insertRecords(sensors, actuators, (Calendar) this.clock.clone());
+			this.analyzer.sensorValuesAnalysis(sensors, actuators, this.currentModes, (Calendar) this.clock.clone());
 		}
-		//System.out.println("TO ANALYZER: " + toAnalyzer);
-    	//una volta generata la lista, viene mandata all'analyzer
-		analyzer.sensorValuesAnalysis(toAnalyzer, actuators, currentMode);
+		this.clock.add(Calendar.MINUTE, 30);
 		
-		messages.clear();
-		paho = new PahoCommunicator(messages);
 	}
+	
 }

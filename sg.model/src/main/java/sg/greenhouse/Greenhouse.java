@@ -7,7 +7,6 @@ public class Greenhouse{
 	private String plant;
 	private int opt_temp;
 	private int opt_hum;
-	private int opt_light;
 	private int opt_t_hum;
 	private int range_temp;
 	private int range_hum;
@@ -15,7 +14,7 @@ public class Greenhouse{
 	
 	public Greenhouse(){}
 	
-	public Greenhouse(int id, String name, String plant, int opt_temp, int opt_hum, int opt_light, int opt_t_hum, 
+	public Greenhouse(int id, String name, String plant, int opt_temp, int opt_hum, int opt_t_hum, 
 			int range_temp, int range_hum, int range_t_hum){
 		
 		this.id = id;
@@ -23,7 +22,6 @@ public class Greenhouse{
 		this.plant = plant;
 		this.opt_temp = opt_temp;
 		this.opt_hum = opt_hum;
-		this.opt_light = opt_light;
 		this.opt_t_hum = opt_t_hum;
 		this.range_temp = range_temp;
 		this.range_hum = range_hum;
@@ -64,14 +62,7 @@ public class Greenhouse{
 	public void setOpt_hum(int opt_hum) {
 		this.opt_hum = opt_hum;
 	}
-	
-	public int getOpt_light() {
-		return this.opt_light;
-	}
-	public void setOpt_light(int opt_light) {
-		this.opt_light = opt_light;
-	}
-	
+		
 	public int getOpt_terrain_hum() {
 		return this.opt_t_hum;
 	}

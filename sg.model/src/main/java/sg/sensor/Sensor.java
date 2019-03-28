@@ -11,10 +11,10 @@ public class Sensor {
 	
 	public Sensor(){}
 	
-	public Sensor(int id, String name, String type, double val, int idGreenhouse) {
+	public Sensor(int id, String type, String name,  double val, int idGreenhouse) {
 		this.id= id;
-		this.name = name;
 		this.type = type;
+		this.name = name;
 		this.value = val;
 		this.idGreenhouse = idGreenhouse;
 		this.status = true;

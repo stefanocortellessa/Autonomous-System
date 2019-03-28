@@ -1,34 +1,38 @@
 package sg.plan;
+
+import java.util.Calendar;
+
 public class Plan {
 	
 	private int id;
 	private String type;
+	private String mode;
 	private boolean active;
-	private double current_value;
+	private double trigger_value;
 	private int problem_code;
-	private int score;
+	private Calendar start_date;
+	private Calendar end_date;
 	private int idGreenhouse;
 	
 	public Plan(){}
+
 	
-	public Plan(int id, String type, boolean active, double current_value, int problem_code,int score, int idGreenhouse){
+	
+	public Plan(int id, String type, String mode, boolean active, double trigger_value, int problem_code, Calendar start_date,
+			Calendar end_date, int idGreenhouse) {
 		this.id = id;
 		this.type = type;
+		this.mode = mode;
 		this.active = active;
-		this.current_value = current_value;
+		this.trigger_value = trigger_value;
 		this.problem_code = problem_code;
-		this.score = score;
+		this.start_date = start_date;
+		this.end_date = end_date;
 		this.idGreenhouse = idGreenhouse;
 	}
-	
-	public Plan(String type, boolean active,double current_value, int problem_code,int idGreenhouse){
-		this.type = type;
-		this.active = active;
-		this.current_value = current_value;
-		this.problem_code = problem_code;
-		this.idGreenhouse = idGreenhouse;
-	}
-	
+
+
+
 	public int getId(){
 		return this.id;
 	}
@@ -53,23 +57,7 @@ public class Plan {
 		this.active = active;
 	}
 	
-	
-	public int getScore(){
-		return this.score;
-	}
-	
-	public void setScore(int score){
-		this.score= score;
-	}
-	
-	public double getCurrentValue(){
-		return this.current_value;
-	}
-	
-	public void setCurrentValue(double current_value){
-		this.current_value = current_value;
-	}
-	
+
 	public int getProblemCode(){
 		return this.problem_code;
 	}
@@ -83,6 +71,46 @@ public class Plan {
 	}
 	public void setIdGreenhouse(int idGreenhouse) {
 		this.idGreenhouse = idGreenhouse;
+	}
+
+	public Calendar getStart_date() {
+		return start_date;
+	}
+
+	public void setStart_date(Calendar start_date) {
+		this.start_date = start_date;
+	}
+
+	public Calendar getEnd_date() {
+		return end_date;
+	}
+
+	public void setEnd_date(Calendar end_date) {
+		this.end_date = end_date;
+	}
+
+
+
+	public double getTrigger_value() {
+		return trigger_value;
+	}
+
+
+
+	public void setTrigger_value(double trigger_value) {
+		this.trigger_value = trigger_value;
+	}
+
+
+
+	public String getMode() {
+		return mode;
+	}
+
+
+
+	public void setMode(String mode) {
+		this.mode = mode;
 	}
 	
 }	

@@ -2,8 +2,6 @@ package sg.paho;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -13,28 +11,29 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 public class PahoCommunicator implements MqttCallback {
 
-	private static final AtomicInteger c = new AtomicInteger(0);
+	int k = 0;
 	MqttClient client;
-	Map<Integer, String> messages;
-	Map<Integer, String> topics = new HashMap<Integer, String>();
-	String mess;
+	Map<Integer, String> messages = new HashMap<Integer,String>();
+	Map<Integer, String> topics = new HashMap<Integer,String>();
 
-	public PahoCommunicator() {
+	public PahoCommunicator() {}
+
+	public Map<Integer, String> getMessages() {
+		return messages;
 	}
 
-	public PahoCommunicator(Map<Integer, String> m) {
-		this.messages = m;
+	public void setMessages(Map<Integer, String> messages) {
+		this.messages = messages;
 	}
-	
-	public PahoCommunicator(Map<Integer, String> m, Map<Integer, String> t) {
-		this.messages = m;
-		this.topics = t;
+
+	public Map<Integer, String> getTopics() {
+		return topics;
 	}
-	
-	public PahoCommunicator(String m) {
-		this.mess = m;
+
+	public void setTopics(Map<Integer, String> topics) {
+		this.topics = topics;
 	}
-	
+
 	public void connectionLost(Throwable arg0) {
 
 		System.out.println("The connection with the server is lost !!!!");
@@ -42,44 +41,43 @@ public class PahoCommunicator implements MqttCallback {
 
 	public void deliveryComplete(IMqttDeliveryToken arg0) {
 
-		System.out.println("The delivery has been complete. The delivery token is " + arg0.toString());
+		System.out.println("The delivery has been complete. The delivery token is ");
 	}
 
 	public void messageArrived(String topic, MqttMessage message) throws Exception {
 
-		//System.out.println("A new message arrived from the topic: \"" + topic + "\". The payload of the message is "
-		//		+ message.toString());
-
-		messages.putIfAbsent(c.get(), new String());
-		messages.replace(c.get(), message.toString());
-		topics.putIfAbsent(c.get(), topic);
-		c.addAndGet(1);
+		this.messages.put(this.k,message.toString());
+		this.topics.put(this.k , topic);
+		/*utilizzo il contatore per identificare univocamente il topic da cui deriva ogni messaggio.
+		Non avendo questo valore altra utilità, uso l'operazione di modulo per evitare che assuma valori troppo
+		elevati nel tempo, fissando il valore 1000 come secondo operatore dell'operazione*/
+		this.k %= 1000;
+		this.k++;
 	}
 
-	public void publish(String channel, String mess, String clientId) {
+	public void publish(String channel, String mess) {
 
 		try {
 			MemoryPersistence memoryPersistence = new MemoryPersistence();
-			client = new MqttClient("tcp://localhost:1883", clientId, memoryPersistence);
+			client = new MqttClient("tcp://localhost:1883", MqttClient.generateClientId(), memoryPersistence);
 			client.connect();
-
 			MqttMessage message = new MqttMessage();
-			message.setQos(2);
 			message.setPayload(mess.getBytes());
+			message.setQos(2);
 			client.publish(channel, message);
-			// client.disconnect();
+			client.disconnect();
 		} catch (MqttException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public void subscribe(String channel, String clientId) {
+	public void subscribe(String channel) {
 
 		try {
-
 			MemoryPersistence memoryPersistence = new MemoryPersistence();
-			client = new MqttClient("tcp://localhost:1883", clientId, memoryPersistence);
+			client = new MqttClient("tcp://localhost:1883", MqttClient.generateClientId(), memoryPersistence);
 			client.setCallback(this);
+			
 			client.connect();
 			client.subscribe(channel);
 		} catch (MqttException e) {

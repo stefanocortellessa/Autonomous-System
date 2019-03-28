@@ -7,30 +7,38 @@ import java.util.Map;
 import sg.constant.Constant;
 import sg.paho.PahoCommunicator;
 
-public class Executor extends Thread {
+public class Executor{
 
-	
-	private Map<Integer, String> messages = new HashMap<Integer,String>();
-    private PahoCommunicator paho = new PahoCommunicator(messages);
+	private PahoCommunicator paho_executor = new PahoCommunicator();
 
-	public void executor(HashMap<Integer, ArrayList<String>> actions) {
+	public void executor(Map<Integer, ArrayList<String>> actions, Map<Integer, String> newModes) {
 
+		
+		
+		//per ogni serra, invio le azioni generate dal planner ai relativi attuatori
 		for (Map.Entry<Integer, ArrayList<String>> action : actions.entrySet()) {
 
-			if (!(action.getValue().isEmpty())) {
-				for (String act : action.getValue()) {
-
-					String type = Constant.parse_message(act)[0];
-					int power = Integer.parseInt(Constant.parse_message(act)[1]);
-															
-															//idGh
-					paho.publish("executor/greenhouse/" + action.getKey() + "/actuator/"+ type,  
-							power+"", 
-							Constant.executor_sender);
-					
-					//dbm.updateActuatorPower(power, type, action.getKey());
-				}
+			
+			for (String act : action.getValue()) {
+				String type = Constant.parseMessage(act)[0];
+				int power = Integer.parseInt(Constant.parseMessage(act)[1]);
+														
+				this.paho_executor.publish(Constant.executor_channel.replace("+", Integer.toString(action.getKey())).replace("#", type),
+						Integer.toString(power));
+				
+				this.paho_executor.publish(Constant.openhab_actuator_channel.replace("+", Integer.toString(action.getKey())).replace("#", type),
+						Integer.toString(power));
 			}
+			
+			
+			//eseguo il cambio di modalità della serra generato dal planner, se presente
+			if(newModes.containsKey(action.getKey())){
+				this.paho_executor.publish(Constant.mode_channel.replace("#", Integer.toString(action.getKey())), 
+						newModes.get(action.getKey()));
+			}
+			
 		}
+		
+		
 	}
 }

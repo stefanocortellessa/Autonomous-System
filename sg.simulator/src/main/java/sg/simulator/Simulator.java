@@ -34,7 +34,7 @@ public class Simulator extends Thread{
 		// sottoscrizione al canale del componente Executor
 		this.paho_mape.subscribe(Constant.executor_channel);
 		
-		// sottoscrizione al canale del componente Updater
+		// sottoscrizione al canale per l'update da OpenHab
 		this.paho_updater.subscribe(Constant.updater_channel);
 		
 		//inizializzo il clock
@@ -104,7 +104,7 @@ public class Simulator extends Thread{
 		//svuoto la mappa dei messaggi
 		this.paho_mape.getMessages().clear();
 		
-		// recupero tutti i dati relativi agli attuatori che mi arrivano tramite mqtt dall'updater.		
+		// recupero tutti i dati relativi agli attuatori che arrivano da OpenHab.		
 		for(Map.Entry<Integer, String> message : this.paho_updater.getMessages().entrySet()){
 			this.actuators.get(Constant.get_id_greenhouse(this.paho_updater.getTopics().get(message.getKey())))
 					.get(Constant.get_actuator_type(this.paho_updater.getTopics().get(message.getKey())))

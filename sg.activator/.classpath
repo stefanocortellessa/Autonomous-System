@@ -24,7 +24,6 @@
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/sg.monitor"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/sg.simulator"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/sg.updater"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/sg.paho"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/sg.knowledge"/>
 	<classpathentry kind="output" path="target/classes"/>

@@ -51,14 +51,6 @@ public class Simulator extends Thread{
 		
 	}
 	
-	public void simulationUpdate(){
-		ArrayList<Greenhouse> greenhouses = this.dbm.selectAllGreenhouses();
-		for (Greenhouse greenhouse: greenhouses){
-			this.sensors.put(greenhouse.getId(), dbm.selectGreenhouseSensors(greenhouse.getId()));	
-			this.actuators.put(greenhouse.getId(), dbm.selectGreenhouseActuators(greenhouse.getId()));	
-		}	
-	}
-	
 	public void run() {
 		
 		
@@ -127,11 +119,6 @@ public class Simulator extends Thread{
 		  
 		this.paho_updater.publish(Constant.clock_channel, time);
 		this.clock.add(Calendar.MINUTE, 30);
-		
-		//una volta al giorno, a mezzanotte controllo l'eventuale aggiunta di nuove serre
-		if (this.clock.get(Calendar.HOUR) == 0 && this.clock.get(Calendar.MINUTE)==0){
-			this.simulationUpdate();
-		}
 	}
 
 	public void actuatorsToMonitor(int idGh){

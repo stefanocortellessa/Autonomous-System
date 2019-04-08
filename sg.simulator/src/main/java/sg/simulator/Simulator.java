@@ -93,8 +93,8 @@ public class Simulator extends Thread{
 					.setPower(Integer.parseInt(message.getValue()));
 		}
 		
-		//svuoto la mappa dei messaggi
-		this.paho_mape.getMessages().clear();
+		//svuoto la mappa dei messaggi ricevuti dall'Executor
+		this.paho_mape.clear();
 		
 		// recupero tutti i dati relativi agli attuatori che arrivano da OpenHab.		
 		for(Map.Entry<Integer, String> message : this.paho_updater.getMessages().entrySet()){
@@ -102,8 +102,8 @@ public class Simulator extends Thread{
 					.get(Constant.get_actuator_type(this.paho_updater.getTopics().get(message.getKey())))
 					.setPower(Integer.parseInt(message.getValue()));
 		}
-		//svuoto la mappa dei messaggi
-		this.paho_updater.getMessages().clear();
+		//svuoto la mappa dei messaggi da OpenHab
+		this.paho_updater.clear();
 		
 		/*  una volta raccolti tutti i dati degli attuatori con i rispettivi stati e valori posso chiamare i metodi 'updateSensorValues'
 		 *  e 'actuatorsToMonitor'. Il primo, tenendo conto dei dati ricevuti, andrà a generare le opportune simulazioni per i sensori

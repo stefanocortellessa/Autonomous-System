@@ -77,7 +77,7 @@ public class Monitor extends Thread{
 		Map<Integer, HashMap<String, Sensor>>  sensors = new HashMap<Integer, HashMap<String, Sensor>>(); 
 		
 		Map<Integer, HashMap<String, Actuator>> actuators = new HashMap<Integer, HashMap<String, Actuator>>();
-		this.paho_signal.getMessages().clear();
+		this.paho_signal.clear();
 		
 		for (Map.Entry<Integer, String> mode : this.paho_modes.getMessages().entrySet()) {
     		if(mode.getValue() != null) {
@@ -132,9 +132,9 @@ public class Monitor extends Thread{
 		}
     	
     	//elimino i messaggi ricevuti dagli oggetti Paho
-    	this.paho_sensors.getMessages().clear();
-    	this.paho_actuators.getMessages().clear();
-		this.paho_modes.getMessages().clear();
+    	this.paho_sensors.clear();
+    	this.paho_actuators.clear();
+		this.paho_modes.clear();
 		
 		/*controllo se sono stati raccolti correttamente tutti i sensori e gli attuatori. In caso contrario,
 		verrà notificato su OpenHab e quella serra non verrà analizzata*/

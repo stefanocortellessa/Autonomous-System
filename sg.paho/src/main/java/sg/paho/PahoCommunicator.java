@@ -54,6 +54,11 @@ public class PahoCommunicator implements MqttCallback {
 		this.k %= 1000;
 		this.k++;
 	}
+	
+	public void clear(){
+		this.messages.clear();
+		this.topics.clear();
+	}
 
 	public void publish(String channel, String mess) {
 

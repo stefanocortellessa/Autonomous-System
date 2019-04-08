@@ -440,7 +440,7 @@ public class Planner {
 		if(active_plans.containsKey(Constant.int_hum_type) && !(active_plans.get(Constant.int_hum_type).getMode().equals(Constant.danger_mode))) {
 		
 			//converto il piano temperatura in corso a DANGER
-			db.toDanger(active_plans.get(Constant.int_temp_type).getId());
+			db.toDanger(active_plans.get(Constant.int_hum_type).getId());
 		
 			if (states.get(Constant.int_hum_type) == Constant.low_int_hum || 
 					states.get(Constant.int_hum_type) == Constant.danger_low_int_hum){
@@ -452,11 +452,10 @@ public class Planner {
 		
 				reactions.add(Constant.humidifier+Constant.neg_sep+Constant.modes.get(Constant.danger_mode).get(0));
 				
-			
 			}
 		}
 		
-		if(!(active_plans.containsKey(Constant.int_temp_type))) { 
+		if(!(active_plans.containsKey(Constant.int_hum_type))) { 
 			
 			if (states.get(Constant.int_hum_type) == Constant.low_int_hum || 
 					states.get(Constant.int_hum_type) == Constant.danger_low_int_hum){
@@ -518,10 +517,6 @@ public class Planner {
 		return reactions;
 	}
 	
-
-
-		
-
 	//Temperatura
 	public String setConditioner(Integer state,int power) {
 

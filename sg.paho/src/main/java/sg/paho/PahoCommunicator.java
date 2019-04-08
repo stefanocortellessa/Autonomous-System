@@ -1,7 +1,7 @@
 package sg.paho;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -13,8 +13,8 @@ public class PahoCommunicator implements MqttCallback {
 
 	int k = 0;
 	MqttClient client;
-	Map<Integer, String> messages = new HashMap<Integer,String>();
-	Map<Integer, String> topics = new HashMap<Integer,String>();
+	Map<Integer, String> messages = new ConcurrentHashMap<Integer,String>();
+	Map<Integer, String> topics = new ConcurrentHashMap<Integer,String>();
 
 	public PahoCommunicator() {}
 
